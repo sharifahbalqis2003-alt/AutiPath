@@ -1,0 +1,2405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>StepByStep Buddy | Daily Self-Care Learning</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Nunito & Inter for high legibility and friendly rounded letterforms -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+    <!-- Tone.js for gentle, soothing Web Audio chimes (zero external audio URLs) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Nunito', 'sans-serif'],
+                    },
+                    colors: {
+                        cream: '#FDFBF7',
+                        softSand: '#F2EFE9',
+                        sageLight: '#E2EFE6',
+                        sage: '#84A98C',
+                        sageDark: '#52796F',
+                        calmBlueLight: '#E3EFF8',
+                        calmBlue: '#76A5AF',
+                        calmBlueDark: '#457B9D',
+                        softLavenderLight: '#EFE8F8',
+                        softLavender: '#9D8189',
+                        softPeachLight: '#FBECE3',
+                        softPeach: '#E07A5F',
+                        softYellowLight: '#FDF6E3',
+                        softYellow: '#E9C46A',
+                        softCoralLight: '#FBECE8',
+                        softCoral: '#E07A5F',
+                        ink: '#2F3E46',
+                        inkMuted: '#52606D'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Sensory-friendly base styles */
+        body {
+            background-color: #FDFBF7;
+            color: #2F3E46;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        /* Gentle animations that respect Quiet Mode */
+        @keyframes gentleFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+        }
+
+        @keyframes gentlePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+
+        @keyframes bubbleRise {
+            0% { transform: translateY(10px) scale(0.8); opacity: 0; }
+            50% { opacity: 0.9; }
+            100% { transform: translateY(-35px) scale(1.1); opacity: 0; }
+        }
+
+        .animate-float {
+            animation: gentleFloat 3.5s ease-in-out infinite;
+        }
+
+        .animate-soft-pulse {
+            animation: gentlePulse 2.5s ease-in-out infinite;
+        }
+
+        .bubble-anim {
+            animation: bubbleRise 2.4s ease-in-out infinite;
+        }
+
+        /* Quiet Mode disables motion for children sensitive to movement */
+        body.quiet-mode .animate-float,
+        body.quiet-mode .animate-soft-pulse,
+        body.quiet-mode .bubble-anim {
+            animation: none !important;
+        }
+
+        body.quiet-mode * {
+            transition-duration: 0.05s !important;
+        }
+
+        /* Custom large sensory-friendly focus rings */
+        button:focus-visible {
+            outline: 4px solid #76A5AF;
+            outline-offset: 3px;
+        }
+
+        /* Smooth custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #F2EFE9;
+            border-radius: 999px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #CBD5E1;
+            border-radius: 999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94A3B8;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans antialiased selection:bg-calmBlueLight">
+
+    <!-- Top Navigation & Sensory Controls Header -->
+    <header class="bg-white/90 backdrop-blur-md border-b-2 border-softSand sticky top-0 z-30 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+            <!-- Brand / Home Button -->
+            <button onclick="navigateTo('home')" class="flex items-center gap-3 text-left group rounded-2xl p-1.5 hover:bg-softSand transition">
+                <div class="w-12 h-12 rounded-2xl bg-sageLight border-2 border-sage flex items-center justify-center text-2xl shadow-sm">
+                    🌱
+                </div>
+                <div>
+                    <h1 class="font-display font-extrabold text-xl sm:text-2xl text-ink tracking-tight leading-none">
+                        StepByStep Buddy
+                    </h1>
+                    <p class="text-xs sm:text-sm text-inkMuted font-medium mt-1">My Daily Self-Care Helper</p>
+                </div>
+            </button>
+
+            <!-- Right Status & Sensory Controls -->
+            <div class="flex items-center gap-2 sm:gap-3">
+                <!-- Shareable Clickable Game Link -->
+                <a href="#view-schedule"
+                   onclick="navigateTo('schedule'); return false;"
+                   class="hidden md:inline-flex items-center gap-1.5 bg-sageLight border-2 border-sage px-3.5 py-2 rounded-2xl font-display font-bold text-sm text-ink hover:brightness-95 transition shadow-sm"
+                   title="Direct Game Link">
+                    <span>🔗</span>
+                    <span>Game Link</span>
+                </a>
+
+                <!-- Star Counter Badge -->
+                <button onclick="navigateTo('rewards')" class="flex items-center gap-2 bg-softYellowLight border-2 border-softYellow px-3.5 py-2 rounded-2xl font-display font-bold text-ink hover:brightness-95 transition shadow-sm" title="View My Stars">
+                    <span class="text-xl">⭐</span>
+                    <span id="header-star-count" class="text-lg">0</span>
+                    <span class="hidden sm:inline text-sm text-inkMuted font-semibold">Stars</span>
+                </button>
+
+                <!-- Quiet Mode Toggle (Sensory Overload Protection) -->
+                <button id="quiet-mode-btn" onclick="toggleQuietMode()" class="flex items-center gap-2 bg-calmBlueLight border-2 border-calmBlue px-3.5 py-2 rounded-2xl font-display font-bold text-sm text-ink hover:brightness-95 transition shadow-sm" aria-pressed="false">
+                    <span id="quiet-mode-icon" class="text-lg">🌿</span>
+                    <span id="quiet-mode-label">Calm Mode: Off</span>
+                </button>
+
+                <!-- Parent / Caregiver Settings Button -->
+                <button onclick="openSettingsModal()" class="p-2.5 bg-softSand border-2 border-stone-300 rounded-2xl text-ink hover:bg-stone-200 transition shadow-sm" aria-label="Caregiver Settings" title="Caregiver Settings">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Predictable Navigation Bar -->
+        <nav class="max-w-6xl mx-auto px-4 pb-3 pt-1 flex items-center gap-2 overflow-x-auto">
+            <button data-nav="schedule" onclick="navigateTo('schedule')" class="nav-pill flex-shrink-0 px-4 py-2.5 rounded-2xl font-display font-bold text-sm sm:text-base flex items-center gap-2 border-2 transition">
+                <span>🗓️</span> Visual Schedule
+            </button>
+            <button data-nav="firstthen" onclick="navigateTo('firstthen')" class="nav-pill flex-shrink-0 px-4 py-2.5 rounded-2xl font-display font-bold text-sm sm:text-base flex items-center gap-2 border-2 transition">
+                <span>➡️</span> First / Then Board
+            </button>
+            <button data-nav="sequences" onclick="navigateTo('sequences')" class="nav-pill flex-shrink-0 px-4 py-2.5 rounded-2xl font-display font-bold text-sm sm:text-base flex items-center gap-2 border-2 transition">
+                <span>🔢</span> Task Sequences
+            </button>
+            <button data-nav="minigames" onclick="navigateTo('minigames')" class="nav-pill flex-shrink-0 px-4 py-2.5 rounded-2xl font-display font-bold text-sm sm:text-base flex items-center gap-2 border-2 transition">
+                <span>🎮</span> Mini-Games & Practice
+            </button>
+            <button data-nav="rewards" onclick="navigateTo('rewards')" class="nav-pill flex-shrink-0 px-4 py-2.5 rounded-2xl font-display font-bold text-sm sm:text-base flex items-center gap-2 border-2 transition">
+                <span>⭐</span> Rewards & Star Shop
+            </button>
+        </nav>
+    </header>
+
+    <!-- Gentle Non-Intrusive Feedback Banner (Replaces alert) -->
+    <div id="gentle-toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 transition-opacity duration-300 w-[92%] max-w-md">
+        <div class="bg-white border-2 border-sage rounded-3xl p-4 shadow-lg flex items-center gap-3">
+            <span id="toast-icon" class="text-3xl">🌟</span>
+            <div>
+                <p id="toast-title" class="font-display font-bold text-ink text-base">Great Job!</p>
+                <p id="toast-message" class="text-sm text-inkMuted">You earned a star!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Container -->
+    <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-6 sm:py-8">
+
+        <!-- ==================== VIEW 1: INTERACTIVE VISUAL SCHEDULE ==================== -->
+        <section id="view-schedule" class="space-y-6">
+            <!-- Header & Time-of-Day Presets -->
+            <div class="bg-white border-2 border-softSand rounded-3xl p-5 sm:p-6 shadow-sm space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <div class="inline-flex items-center gap-2 bg-sageLight text-sageDark font-display font-bold text-xs px-3 py-1 rounded-full mb-1">
+                            <span>🗓️</span> Daily Routine Timeline
+                        </div>
+                        <h2 class="font-display font-extrabold text-2xl sm:text-3xl text-ink">My Visual Schedule</h2>
+                        <p class="text-inkMuted text-sm sm:text-base">Follow your day step by step. Tap <strong>Mark Done</strong> to move finished tasks to the All Done pocket!</p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button onclick="openScheduleEditor()" class="px-4 py-2.5 rounded-2xl bg-softLavenderLight hover:brightness-95 border-2 border-softLavender font-display font-bold text-sm text-ink transition flex items-center gap-1.5">
+                            <span>✏️</span> Customize Schedule
+                        </button>
+                        <button onclick="resetSchedulePeriod()" class="px-4 py-2.5 rounded-2xl bg-softSand hover:bg-stone-200 border-2 border-stone-300 font-display font-bold text-sm text-ink transition">
+                            🔄 Reset Day
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Time-of-Day Filter Pills -->
+                <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+                    <div class="flex flex-wrap gap-2" id="schedule-period-tabs">
+                        <button onclick="setSchedulePeriod('morning')" data-period="morning" class="sched-period-btn px-4 py-2 rounded-2xl border-2 font-display font-bold text-sm flex items-center gap-1.5 transition">
+                            🌅 Morning
+                        </button>
+                        <button onclick="setSchedulePeriod('afternoon')" data-period="afternoon" class="sched-period-btn px-4 py-2 rounded-2xl border-2 font-display font-bold text-sm flex items-center gap-1.5 transition">
+                            ☀️ Afternoon
+                        </button>
+                        <button onclick="setSchedulePeriod('evening')" data-period="evening" class="sched-period-btn px-4 py-2 rounded-2xl border-2 font-display font-bold text-sm flex items-center gap-1.5 transition">
+                            🌙 Evening
+                        </button>
+                        <button onclick="setSchedulePeriod('all')" data-period="all" class="sched-period-btn px-4 py-2 rounded-2xl border-2 font-display font-bold text-sm flex items-center gap-1.5 transition">
+                            📋 Full Day
+                        </button>
+                    </div>
+                    <button onclick="readScheduleAloud()" class="px-4 py-2 rounded-2xl bg-calmBlueLight hover:brightness-95 border-2 border-calmBlue font-display font-bold text-sm text-ink transition flex items-center gap-1.5">
+                        <span>🔊</span> Read Next Up
+                    </button>
+                </div>
+            </div>
+
+            <!-- Two-Column Layout: Active Timeline (To Do) vs. All Done Pocket -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                <!-- Left: Active Timeline (7 cols) -->
+                <div class="lg:col-span-7 space-y-3">
+                    <div class="flex items-center justify-between px-1">
+                        <h3 class="font-display font-extrabold text-lg sm:text-xl text-ink flex items-center gap-2">
+                            <span>📌</span> Happening Now & Up Next
+                        </h3>
+                        <span id="schedule-remaining-badge" class="text-xs font-bold bg-calmBlueLight text-calmBlueDark px-3 py-1 rounded-full">0 Left</span>
+                    </div>
+                    <div id="schedule-todo-list" class="space-y-3">
+                        <!-- Populated via JS -->
+                    </div>
+                </div>
+
+                <!-- Right: Finished / All Done Pocket (5 cols) -->
+                <div class="lg:col-span-5 bg-sageLight/50 border-2 border-sage rounded-3xl p-5 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-display font-extrabold text-lg sm:text-xl text-ink flex items-center gap-2">
+                            <span>✅</span> All Done Pocket
+                        </h3>
+                        <span id="schedule-done-badge" class="text-xs font-bold bg-white text-sageDark border border-sage px-3 py-1 rounded-full">0 Finished</span>
+                    </div>
+                    <p class="text-xs sm:text-sm text-inkMuted">Completed tasks rest here. Tap a card to move it back if needed.</p>
+                    <div id="schedule-done-list" class="space-y-2.5 min-h-[160px]">
+                        <!-- Populated via JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== VIEW 2: FIRST / THEN BOARD ==================== -->
+        <section id="view-firstthen" class="hidden space-y-6">
+            <!-- Header & Voice Prompt -->
+            <div class="bg-white border-2 border-softSand rounded-3xl p-5 sm:p-6 shadow-sm flex flex-wrap items-center justify-between gap-4">
+                <div>
+                    <div class="inline-flex items-center gap-2 bg-softPeachLight text-rose-900 font-display font-bold text-xs px-3 py-1 rounded-full mb-1">
+                        <span>➡️</span> Transition & Motivation Helper
+                    </div>
+                    <h2 class="font-display font-extrabold text-2xl sm:text-3xl text-ink">First / Then Board</h2>
+                    <p class="text-inkMuted text-sm sm:text-base">Finish the <strong>FIRST</strong> task to unlock your <strong>THEN</strong> reward!</p>
+                </div>
+                <div class="flex flex-wrap gap-2.5">
+                    <button onclick="readFirstThenBoard()" class="px-5 py-3 rounded-2xl bg-calmBlueLight hover:brightness-95 border-2 border-calmBlue font-display font-bold text-sm sm:text-base text-ink transition flex items-center gap-2 shadow-sm">
+                        <span class="text-xl">🔊</span> Read Board Aloud
+                    </button>
+                    <button onclick="resetFirstThenBoard()" class="px-4 py-3 rounded-2xl bg-softSand hover:bg-stone-200 border-2 border-stone-300 font-display font-bold text-sm sm:text-base text-ink transition">
+                        🔄 Reset Board
+                    </button>
+                </div>
+            </div>
+
+            <!-- High-Contrast Two-Panel FIRST -> THEN Visual Board -->
+            <div class="grid grid-cols-1 md:grid-cols-11 gap-4 items-stretch">
+                <!-- FIRST Panel (5 cols) -->
+                <div id="ft-first-panel" class="md:col-span-5 bg-calmBlueLight/70 border-4 border-calmBlue rounded-3xl p-6 flex flex-col justify-between items-center text-center shadow-sm transition-all">
+                    <div class="w-full flex items-center justify-between">
+                        <span class="bg-calmBlue text-white font-display font-extrabold text-base sm:text-lg px-4 py-1.5 rounded-2xl tracking-wide uppercase">
+                            1. FIRST
+                        </span>
+                        <span id="ft-first-status" class="text-xs font-bold bg-white text-calmBlueDark px-3 py-1 rounded-full border border-calmBlue">
+                            To Do
+                        </span>
+                    </div>
+
+                    <div class="my-6 space-y-3">
+                        <div id="ft-first-emoji" class="w-28 h-28 sm:w-32 sm:h-32 mx-auto rounded-3xl bg-white border-2 border-calmBlue flex items-center justify-center text-6xl sm:text-7xl shadow-sm">
+                            🪥
+                        </div>
+                        <h3 id="ft-first-title" class="font-display font-extrabold text-2xl sm:text-3xl text-ink">
+                            Brush Teeth
+                        </h3>
+                    </div>
+
+                    <button id="ft-complete-btn" onclick="completeFirstThenTask()" class="w-full py-4 px-6 rounded-2xl bg-sage hover:bg-sageDark text-white font-display font-extrabold text-lg sm:text-xl shadow-sm transition flex items-center justify-center gap-2">
+                        <span>✅</span> I Did It!
+                    </button>
+                </div>
+
+                <!-- Center Direction Arrow (1 col) -->
+                <div class="md:col-span-1 flex items-center justify-center py-2">
+                    <div class="w-14 h-14 rounded-full bg-white border-2 border-softSand shadow-sm flex items-center justify-center text-3xl font-extrabold text-ink rotate-90 md:rotate-0">
+                        ➡️
+                    </div>
+                </div>
+
+                <!-- THEN Panel (5 cols) -->
+                <div id="ft-then-panel" class="md:col-span-5 bg-softYellowLight/70 border-4 border-softYellow rounded-3xl p-6 flex flex-col justify-between items-center text-center shadow-sm transition-all">
+                    <div class="w-full flex items-center justify-between">
+                        <span class="bg-softYellow text-ink font-display font-extrabold text-base sm:text-lg px-4 py-1.5 rounded-2xl tracking-wide uppercase">
+                            2. THEN
+                        </span>
+                        <span id="ft-then-status" class="text-xs font-bold bg-white text-amber-800 px-3 py-1 rounded-full border border-softYellow">
+                            🔒 Waiting for First
+                        </span>
+                    </div>
+
+                    <div class="my-6 space-y-3">
+                        <div id="ft-then-emoji" class="w-28 h-28 sm:w-32 sm:h-32 mx-auto rounded-3xl bg-white border-2 border-softYellow flex items-center justify-center text-6xl sm:text-7xl shadow-sm">
+                            🧱
+                        </div>
+                        <h3 id="ft-then-title" class="font-display font-extrabold text-2xl sm:text-3xl text-ink">
+                            Play with Blocks
+                        </h3>
+                    </div>
+
+                    <div id="ft-reward-banner" class="w-full py-3.5 px-4 rounded-2xl bg-white/90 border-2 border-softYellow font-display font-bold text-sm sm:text-base text-inkMuted">
+                        Finish FIRST to unlock your reward (+2 ⭐)
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preset & Custom Choosers for FIRST and THEN -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Choose FIRST Task -->
+                <div class="bg-white border-2 border-softSand rounded-3xl p-5 sm:p-6 shadow-sm space-y-4">
+                    <h3 class="font-display font-extrabold text-lg sm:text-xl text-ink flex items-center gap-2">
+                        <span class="w-7 h-7 rounded-lg bg-calmBlueLight text-calmBlueDark inline-flex items-center justify-center text-sm font-black">1</span>
+                        Choose FIRST Task
+                    </h3>
+                    <div id="ft-first-presets" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                        <!-- Populated via JS -->
+                    </div>
+                    <!-- Custom First Input -->
+                    <div class="flex gap-2 pt-1">
+                        <input id="ft-custom-first-input" type="text" maxlength="32" placeholder="Or type custom task..." class="flex-1 px-4 py-2.5 rounded-2xl border-2 border-stone-200 focus:border-calmBlue outline-none text-sm font-medium bg-cream">
+                        <button onclick="applyCustomFirstTask()" class="px-4 py-2.5 rounded-2xl bg-calmBlueLight border-2 border-calmBlue font-display font-bold text-sm text-ink hover:brightness-95 transition">
+                            Set
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Choose THEN Reward -->
+                <div class="bg-white border-2 border-softSand rounded-3xl p-5 sm:p-6 shadow-sm space-y-4">
+                    <h3 class="font-display font-extrabold text-lg sm:text-xl text-ink flex items-center gap-2">
+                        <span class="w-7 h-7 rounded-lg bg-softYellowLight text-amber-800 inline-flex items-center justify-center text-sm font-black">2</span>
+                        Choose THEN Reward
+                    </h3>
+                    <div id="ft-then-presets" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                        <!-- Populated via JS -->
+                    </div>
+                    <!-- Custom Then Input -->
+                    <div class="flex gap-2 pt-1">
+                        <input id="ft-custom-then-input" type="text" maxlength="32" placeholder="Or type custom reward..." class="flex-1 px-4 py-2.5 rounded-2xl border-2 border-stone-200 focus:border-softYellow outline-none text-sm font-medium bg-cream">
+                        <button onclick="applyCustomThenReward()" class="px-4 py-2.5 rounded-2xl bg-softYellowLight border-2 border-softYellow font-display font-bold text-sm text-ink hover:brightness-95 transition">
+                            Set
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== VIEW 3: STEP-BY-STEP TASK SEQUENCES ==================== -->
+        <section id="view-sequences" class="hidden space-y-6">
+            <!-- Header & Sequence Selector -->
+            <div class="bg-white border-2 border-softSand rounded-3xl p-5 sm:p-6 shadow-sm space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <div class="inline-flex items-center gap-2 bg-softLavenderLight text-ink font-display font-bold text-xs px-3 py-1 rounded-full mb-1">
+                            <span>🔢</span> Step-by-Step Self-Care Chains
+                        </div>
+                        <h2 class="font-display font-extrabold text-2xl sm:text-3xl text-ink">Task Sequences</h2>
+                        <p class="text-inkMuted text-sm sm:text-base">Pick a routine and follow one step at a time or view the full sequence strip.</p>
+                    </div>
+
+                    <!-- View Mode Switcher & Reset -->
+                    <div class="flex flex-wrap items-center gap-2">
+                        <div class="inline-flex rounded-2xl bg-softSand p-1 border-2 border-stone-200">
+                            <button id="seq-mode-focus-btn" onclick="setSequenceViewMode('focus')" class="px-3.5 py-2 rounded-xl font-display font-bold text-xs sm:text-sm transition">
+                                🎯 One Step Focus
+                            </button>
+                            <button id="seq-mode-strip-btn" onclick="setSequenceViewMode('strip')" class="px-3.5 py-2 rounded-xl font-display font-bold text-xs sm:text-sm transition">
+                                📋 Full Strip View
+                            </button>
+                        </div>
+                        <button onclick="resetCurrentSequence()" class="px-4 py-2.5 rounded-2xl bg-softSand hover:bg-stone-200 border-2 border-stone-300 font-display font-bold text-sm text-ink transition">
+                            🔄 Restart
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 5 Self-Care Sequence Category Tabs -->
+                <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5 pt-1" id="sequence-tabs">
+                    <!-- Populated via JS -->
+                </div>
+            </div>
+
+            <!-- Active Sequence Progress Bar -->
+            <div class="bg-white border-2 border-softSand rounded-3xl p-5 shadow-sm space-y-3">
+                <div class="flex items-center justify-between">
+                    <span id="seq-title-display" class="font-display font-extrabold text-xl text-ink">🪥 Brushing Teeth</span>
+                    <span id="seq-progress-text" class="font-display font-bold text-sageDark bg-sageLight px-3.5 py-1 rounded-full text-sm">0 of 5 Done</span>
+                </div>
+                <div class="w-full h-5 bg-softSand rounded-full overflow-hidden border border-stone-200">
+                    <div id="seq-progress-bar" class="h-full bg-sage transition-all duration-500 rounded-full" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- MODE A: ONE STEP AT A TIME (FOCUS MODE) -->
+            <div id="seq-focus-container" class="bg-white border-2 border-calmBlue rounded-3xl p-6 sm:p-8 shadow-sm max-w-2xl mx-auto text-center space-y-6">
+                <div class="flex items-center justify-between">
+                    <span id="focus-step-counter" class="bg-calmBlueLight text-calmBlueDark font-display font-extrabold text-sm px-4 py-1.5 rounded-full">
+                        Step 1 of 5
+                    </span>
+                    <button id="focus-listen-btn" onclick="speakFocusedStep()" class="px-4 py-2 rounded-2xl bg-calmBlueLight hover:brightness-95 border-2 border-calmBlue font-display font-bold text-sm text-ink transition flex items-center gap-1.5">
+                        <span>🔊</span> Listen
+                    </button>
+                </div>
+
+                <div class="space-y-3 py-2">
+                    <div id="focus-step-emoji" class="w-28 h-28 sm:w-32 sm:h-32 mx-auto rounded-3xl bg-softYellowLight border-2 border-softYellow flex items-center justify-center text-6xl sm:text-7xl shadow-sm">
+                        🪥
+                    </div>
+                    <h3 id="focus-step-title" class="font-display font-extrabold text-2xl sm:text-3xl text-ink">
+                        1. Get Toothbrush
+                    </h3>
+                    <p id="focus-step-desc" class="text-base sm:text-lg text-inkMuted max-w-md mx-auto leading-relaxed">
+                        Pick up your toothbrush and wet the bristles with water.
+                    </p>
+                </div>
+
+                <!-- Previous & Done - Next Step Controls -->
+                <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
+                    <button id="focus-prev-btn" onclick="prevFocusStep()" class="px-5 py-4 rounded-2xl bg-softSand hover:bg-stone-200 border-2 border-stone-300 font-display font-bold text-base text-ink transition disabled:opacity-40">
+                        ⬅️ Previous
+                    </button>
+                    <button id="focus-next-btn" onclick="completeFocusedStep()" class="flex-1 sm:flex-initial px-8 py-4 rounded-2xl bg-sage hover:bg-sageDark text-white font-display font-extrabold text-lg shadow-sm transition flex items-center justify-center gap-2">
+                        <span>✅</span> Done - Next Step ➡️
+                    </button>
+                </div>
+            </div>
+
+            <!-- MODE B: FULL STRIP VIEW -->
+            <div id="seq-strip-container" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Populated via JS -->
+            </div>
+
+            <!-- Sequence Completion Banner (+3 Stars) -->
+            <div id="seq-complete-box" class="hidden bg-sageLight border-2 border-sage rounded-3xl p-6 text-center space-y-3 shadow-sm">
+                <div class="text-5xl animate-float">🌟</div>
+                <h3 class="font-display font-extrabold text-2xl text-ink">Sequence Complete!</h3>
+                <p class="text-inkMuted text-base max-w-md mx-auto">Amazing work! You completed every step in order and earned <strong>+3 Stars</strong>!</p>
+                <div class="pt-2 flex flex-wrap justify-center gap-3">
+                    <button onclick="speakText('Amazing work! You finished every step in order and earned three bonus stars!')" class="px-5 py-3 rounded-2xl bg-white border-2 border-sage font-display font-bold text-ink hover:bg-sageLight transition">
+                        🔊 Read Aloud
+                    </button>
+                    <button onclick="resetCurrentSequence()" class="px-5 py-3 rounded-2xl bg-sage text-white font-display font-bold hover:bg-sageDark transition">
+                        Practice Again
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== VIEW 4: MINI-GAMES & PRACTICE (WEATHER + HANDWASHING) ==================== -->
+        <section id="view-minigames" class="hidden space-y-6">
+            <!-- Sub-Activity Selector Banner -->
+            <div class="bg-white border-2 border-softSand rounded-3xl p-5 sm:p-6 shadow-sm flex flex-wrap items-center justify-between gap-4">
+                <div>
+                    <div class="inline-flex items-center gap-2 bg-calmBlueLight text-calmBlueDark font-display font-bold text-xs px-3 py-1 rounded-full mb-1">
+                        <span>🎮</span> Interactive Practice Games
+                    </div>
+                    <h2 class="font-display font-extrabold text-2xl sm:text-3xl text-ink">Mini-Games & Practice</h2>
+                    <p class="text-inkMuted text-sm sm:text-base">Choose a game to practice dressing for the weather or washing your hands.</p>
+                </div>
+                <div class="flex flex-wrap gap-2.5">
+                    <button id="subgame-btn-weather" onclick="switchMiniGame('weather')" class="px-5 py-3 rounded-2xl border-2 font-display font-extrabold text-sm sm:text-base flex items-center gap-2 transition">
+                        <span>🧥</span> Weather & Dressing
+                    </button>
+                    <button id="subgame-btn-handwash" onclick="switchMiniGame('handwash')" class="px-5 py-3 rounded-2xl border-2 font-display font-extrabold text-sm sm:text-base flex items-center gap-2 transition">
+                        <span>🧼</span> 20s Handwashing Timer
+                    </button>
+                </div>
+            </div>
+
+            <!-- SUB-GAME A: WEATHER & DRESSING GAME -->
+            <div id="subgame-weather" class="space-y-6">
+                <div class="bg-white border-2 border-softSand rounded-3xl p-5 shadow-sm flex flex-wrap items-center justify-between gap-4">
+                    <div>
+                        <h3 class="font-display font-extrabold text-xl text-ink">Weather & Dressing</h3>
+                        <p class="text-inkMuted text-sm">Look at the weather outside and tap the right clothes for Buddy.</p>
+                    </div>
+                    <!-- Weather Switcher Pills -->
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="setWeatherScenario('sunny')" id="weather-btn-sunny" class="weather-tab px-4 py-2.5 rounded-2xl border-2 font-display font-bold text-sm sm:text-base flex items-center gap-2 transition">
+                            ☀️ Sunny
+                        </button>
+                        <button onclick="setWeatherScenario('rainy')" id="weather-btn-rainy" class="weather-tab px-4 py-2.5 rounded-2xl border-2 font-display font-bold text-sm sm:text-base flex items-center gap-2 transition">
+                            🌧️ Rainy
+                        </button>
+                        <button onclick="setWeatherScenario('cold')" id="weather-btn-cold" class="weather-tab px-4 py-2.5 rounded-2xl border-2 font-display font-bold text-sm sm:text-base flex items-center gap-2 transition">
+                            ❄️ Cold
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                    <!-- Left: Weather Window & Buddy Character (7 cols) -->
+                    <div id="weather-stage" class="lg:col-span-7 bg-softYellowLight border-2 border-softYellow rounded-3xl p-6 shadow-sm flex flex-col items-center justify-between min-h-[380px] transition-colors duration-300">
+                        <!-- Weather Prompt & Read Aloud -->
+                        <div class="w-full flex flex-wrap items-center justify-between gap-3 bg-white/90 rounded-2xl p-4 border border-stone-200">
+                            <div class="flex items-center gap-3">
+                                <span id="weather-icon-big" class="text-4xl">☀️</span>
+                                <div>
+                                    <h3 id="weather-headline" class="font-display font-extrabold text-lg sm:text-xl text-ink">It is a Sunny Day!</h3>
+                                    <p id="weather-subtext" class="text-sm text-inkMuted">Pick 2 light clothes to stay cool.</p>
+                                </div>
+                            </div>
+                            <button onclick="readWeatherPrompt()" class="px-4 py-2.5 rounded-xl bg-calmBlueLight border-2 border-calmBlue font-display font-bold text-sm text-ink hover:brightness-95 transition flex items-center gap-1.5">
+                                <span>🔊</span> Listen
+                            </button>
+                        </div>
+
+                        <!-- Character Display -->
+                        <div class="my-6 flex flex-col items-center">
+                            <div class="relative w-48 h-52 bg-white/80 rounded-3xl border-2 border-dashed border-stone-300 flex flex-col items-center justify-center p-4 shadow-inner">
+                                <!-- Buddy Avatar -->
+                                <div class="text-6xl mb-2">🧒</div>
+                                <!-- Equipped Clothes Slots -->
+                                <div id="equipped-clothes-display" class="flex items-center justify-center gap-3 min-h-[56px]">
+                                    <span class="text-sm text-inkMuted font-medium">Tap clothes to put on</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Status / Next Weather Button -->
+                        <div id="weather-success-bar" class="hidden w-full bg-white border-2 border-sage rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3">
+                            <div class="flex items-center gap-2.5">
+                                <span class="text-2xl">⭐</span>
+                                <span class="font-display font-bold text-ink">Great choice! Buddy is dressed for the weather!</span>
+                            </div>
+                            <button onclick="nextWeatherScenario()" class="px-4 py-2 rounded-xl bg-sage text-white font-display font-bold text-sm hover:bg-sageDark transition">
+                                Next Weather ➡️
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right: Wardrobe Choices (5 cols) -->
+                    <div class="lg:col-span-5 bg-white border-2 border-softSand rounded-3xl p-6 shadow-sm space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-display font-extrabold text-xl text-ink">Closet Choices</h3>
+                            <button onclick="resetWeatherOutfit()" class="text-sm font-bold text-inkMuted hover:text-ink underline">Clear Outfit</button>
+                        </div>
+                        <p class="text-sm text-inkMuted">Tap an item to try it on:</p>
+
+                        <div id="wardrobe-grid" class="grid grid-cols-2 gap-3">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SUB-GAME B: 20-SECOND HANDWASHING TIMER -->
+            <div id="subgame-handwash" class="hidden">
+                <div class="bg-white border-2 border-softSand rounded-3xl p-6 sm:p-8 shadow-sm max-w-3xl mx-auto space-y-6">
+                    <div class="text-center space-y-2">
+                        <h3 class="font-display font-extrabold text-2xl sm:text-3xl text-ink">20-Second Handwashing Helper</h3>
+                        <p class="text-inkMuted text-base">Follow the 5 steps until the 20-second bubble timer finishes.</p>
+                    </div>
+
+                    <!-- Current Step Visual Card -->
+                    <div class="bg-calmBlueLight/60 border-2 border-calmBlue rounded-3xl p-6 text-center space-y-4 relative overflow-hidden">
+                        <!-- Gentle Decorative Bubbles -->
+                        <div id="handwash-bubbles" class="hidden pointer-events-none">
+                            <span class="bubble-anim absolute left-8 bottom-4 text-3xl">🫧</span>
+                            <span class="bubble-anim absolute right-10 bottom-6 text-4xl" style="animation-delay: 0.7s;">🫧</span>
+                            <span class="bubble-anim absolute left-1/3 bottom-2 text-2xl" style="animation-delay: 1.3s;">🫧</span>
+                        </div>
+
+                        <div id="hw-step-badge" class="inline-block bg-white border border-calmBlue px-4 py-1 rounded-full font-display font-bold text-sm text-calmBlueDark">
+                            Ready to Start
+                        </div>
+
+                        <div id="hw-step-emoji" class="text-6xl sm:text-7xl py-2">👐</div>
+
+                        <h4 id="hw-step-title" class="font-display font-extrabold text-2xl sm:text-3xl text-ink">
+                            Press Start to Wash Hands
+                        </h4>
+                        <p id="hw-step-desc" class="text-base sm:text-lg text-inkMuted max-w-md mx-auto">
+                            We will wet, soap, scrub, rinse, and dry our hands together!
+                        </p>
+
+                        <!-- Timer Countdown & Smooth Progress Bar -->
+                        <div class="max-w-md mx-auto pt-2 space-y-2">
+                            <div class="flex justify-between font-display font-bold text-ink text-lg">
+                                <span>Time Left:</span>
+                                <span id="hw-seconds-display">20 seconds</span>
+                            </div>
+                            <div class="w-full h-6 bg-white rounded-full border-2 border-calmBlue overflow-hidden p-0.5">
+                                <div id="hw-progress-bar" class="h-full bg-calmBlue rounded-full transition-all duration-300" style="width: 100%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5 Sequence Step Indicators -->
+                    <div class="grid grid-cols-5 gap-2 text-center" id="hw-sequence-pills">
+                        <div data-hw-idx="0" class="hw-pill p-2.5 rounded-2xl border-2 border-stone-200 bg-softSand">
+                            <div class="text-2xl">💧</div>
+                            <div class="font-display font-bold text-xs sm:text-sm mt-1">1. Wet</div>
+                        </div>
+                        <div data-hw-idx="1" class="hw-pill p-2.5 rounded-2xl border-2 border-stone-200 bg-softSand">
+                            <div class="text-2xl">🧼</div>
+                            <div class="font-display font-bold text-xs sm:text-sm mt-1">2. Soap</div>
+                        </div>
+                        <div data-hw-idx="2" class="hw-pill p-2.5 rounded-2xl border-2 border-stone-200 bg-softSand">
+                            <div class="text-2xl">🫧</div>
+                            <div class="font-display font-bold text-xs sm:text-sm mt-1">3. Scrub</div>
+                        </div>
+                        <div data-hw-idx="3" class="hw-pill p-2.5 rounded-2xl border-2 border-stone-200 bg-softSand">
+                            <div class="text-2xl">🚿</div>
+                            <div class="font-display font-bold text-xs sm:text-sm mt-1">4. Rinse</div>
+                        </div>
+                        <div data-hw-idx="4" class="hw-pill p-2.5 rounded-2xl border-2 border-stone-200 bg-softSand">
+                            <div class="text-2xl">🧻</div>
+                            <div class="font-display font-bold text-xs sm:text-sm mt-1">5. Dry</div>
+                        </div>
+                    </div>
+
+                    <!-- Big Sensory-Friendly Timer Controls -->
+                    <div class="flex flex-wrap items-center justify-center gap-4 pt-2">
+                        <button id="hw-start-btn" onclick="toggleHandwashTimer()" class="px-8 py-4 rounded-2xl bg-sage hover:bg-sageDark text-white font-display font-extrabold text-lg sm:text-xl shadow-sm transition flex items-center gap-2">
+                            <span>▶️</span> Start Washing
+                        </button>
+                        <button onclick="resetHandwashTimer()" class="px-6 py-4 rounded-2xl bg-softSand hover:bg-stone-200 border-2 border-stone-300 text-ink font-display font-bold text-lg transition">
+                            🔄 Reset
+                        </button>
+                        <button onclick="speakCurrentHandwashStep()" class="px-5 py-4 rounded-2xl bg-calmBlueLight hover:bg-calmBlue/30 border-2 border-calmBlue text-ink font-display font-bold text-lg transition">
+                            🔊 Read Aloud
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== VIEW 5: REWARDS, 5-STAR TOKEN BOARD & STICKER SHOP ==================== -->
+        <section id="view-rewards" class="hidden space-y-6">
+            <!-- Top Star Bank Banner -->
+            <div class="bg-white border-2 border-softSand rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="space-y-1 text-center sm:text-left">
+                    <div class="inline-flex items-center gap-2 bg-softYellowLight text-amber-800 font-display font-bold text-xs px-3 py-1 rounded-full mb-1">
+                        <span>🏆</span> Token Economy & Sticker Album
+                    </div>
+                    <h2 class="font-display font-extrabold text-2xl sm:text-3xl text-ink">Rewards & Star Shop</h2>
+                    <p class="text-inkMuted text-base">Fill your 5-Star Token Board for a big reward, or trade stars for collectible stickers!</p>
+                </div>
+                <div class="bg-softYellowLight border-2 border-softYellow px-6 py-4 rounded-3xl flex items-center gap-3 flex-shrink-0">
+                    <span class="text-4xl">⭐</span>
+                    <div>
+                        <div id="rewards-total-stars" class="font-display font-extrabold text-3xl text-ink leading-none">0</div>
+                        <div class="text-xs font-bold uppercase tracking-wider text-inkMuted mt-1">Available Stars</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5-STAR TOKEN BOARD (Working Toward a Big Reward) -->
+            <div class="bg-softLavenderLight/60 border-2 border-softLavender rounded-3xl p-6 sm:p-7 shadow-sm space-y-5">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <h3 class="font-display font-extrabold text-xl sm:text-2xl text-ink flex items-center gap-2">
+                            <span>🎯</span> My 5-Star Token Board
+                        </h3>
+                        <p class="text-sm text-inkMuted">Every completed activity adds a star token toward your chosen goal!</p>
+                    </div>
+                    <!-- Reward Goal Selector -->
+                    <div class="flex flex-wrap items-center gap-2">
+                        <label for="token-goal-select" class="text-xs font-bold uppercase text-inkMuted">Working For:</label>
+                        <select id="token-goal-select" onchange="changeTokenGoal(this.value)" class="px-4 py-2.5 rounded-2xl bg-white border-2 border-softLavender font-display font-bold text-sm text-ink outline-none">
+                            <option value="📚 Extra Story Time">📚 Extra Story Time</option>
+                            <option value="🏞️ Trip to the Park">🏞️ Trip to the Park</option>
+                            <option value="🍕 Choose Dinner">🍕 Choose Dinner</option>
+                            <option value="🫧 Bubble Play Time">🫧 Bubble Play Time</option>
+                            <option value="🎨 Art & Coloring Time">🎨 Art & Coloring Time</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 5 Visual Token Slots -->
+                <div class="bg-white border-2 border-softLavender rounded-3xl p-5 flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div id="token-board-slots" class="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
+                        <!-- Populated via JS -->
+                    </div>
+
+                    <div class="text-center md:text-right space-y-2">
+                        <div class="text-xs font-bold uppercase tracking-wider text-inkMuted">My Big Goal</div>
+                        <div id="token-goal-display" class="font-display font-extrabold text-xl sm:text-2xl text-ink">
+                            📚 Extra Story Time
+                        </div>
+                        <button id="claim-token-goal-btn" onclick="claimTokenGoal()" class="hidden px-5 py-2.5 rounded-2xl bg-sage hover:bg-sageDark text-white font-display font-extrabold text-sm shadow-sm transition">
+                            🎉 Claim Reward & Start New Board!
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COLLECTIBLE STICKER SHOP & ALBUM -->
+            <div class="space-y-4">
+                <div class="flex items-center justify-between px-1">
+                    <h3 class="font-display font-extrabold text-xl sm:text-2xl text-ink">Collectible Sticker Shop & Album</h3>
+                    <span class="text-sm font-bold text-inkMuted">Tap to trade stars for stickers!</span>
+                </div>
+                <div id="badges-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                    <!-- Populated via JS -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ==================== VISUAL SCHEDULE CUSTOMIZER MODAL ==================== -->
+    <div id="schedule-editor-modal" class="hidden fixed inset-0 z-50 bg-ink/40 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white border-2 border-softSand rounded-3xl max-w-lg w-full p-6 shadow-xl space-y-5 max-h-[90vh] flex flex-col">
+            <div class="flex items-center justify-between border-b border-softSand pb-3">
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl">🗓️</span>
+                    <h3 class="font-display font-extrabold text-xl text-ink">Customize Visual Schedule</h3>
+                </div>
+                <button onclick="closeScheduleEditor()" class="w-10 h-10 rounded-xl bg-softSand hover:bg-stone-200 flex items-center justify-center font-bold text-ink">
+                    ✕
+                </button>
+            </div>
+
+            <!-- Add New Schedule Item Form -->
+            <div class="bg-cream border-2 border-softSand rounded-2xl p-4 space-y-3">
+                <p class="font-display font-bold text-sm text-ink">Add a New Schedule Activity</p>
+                <div class="grid grid-cols-12 gap-2">
+                    <select id="new-sched-emoji" class="col-span-3 px-2 py-2.5 rounded-xl bg-white border-2 border-stone-200 text-xl text-center">
+                        <option value="🌞">🌞</option>
+                        <option value="🪥">🪥</option>
+                        <option value="👕">👕</option>
+                        <option value="🥣">🥣</option>
+                        <option value="🎒">🎒</option>
+                        <option value="🥪">🥪</option>
+                        <option value="🧼">🧼</option>
+                        <option value="🛁">🛁</option>
+                        <option value="🛌">🛌</option>
+                        <option value="🧸">🧸</option>
+                        <option value="📚">📚</option>
+                    </select>
+                    <input id="new-sched-title" type="text" maxlength="28" placeholder="Activity name (e.g. Snack Time)" class="col-span-9 px-3.5 py-2.5 rounded-xl bg-white border-2 border-stone-200 text-sm font-medium outline-none focus:border-sage">
+                </div>
+                <div class="flex items-center justify-between gap-2">
+                    <select id="new-sched-period" class="px-3 py-2 rounded-xl bg-white border-2 border-stone-200 text-sm font-bold text-ink">
+                        <option value="morning">🌅 Morning</option>
+                        <option value="afternoon">☀️ Afternoon</option>
+                        <option value="evening">🌙 Evening</option>
+                    </select>
+                    <button onclick="addCustomScheduleItem()" class="px-5 py-2 rounded-xl bg-sage hover:bg-sageDark text-white font-display font-bold text-sm transition">
+                        + Add Activity
+                    </button>
+                </div>
+            </div>
+
+            <!-- Existing Schedule Items List (Reorder / Delete) -->
+            <div id="schedule-editor-list" class="flex-1 overflow-y-auto space-y-2 pr-1">
+                <!-- Populated via JS -->
+            </div>
+
+            <div class="pt-2 border-t border-softSand flex justify-end">
+                <button onclick="closeScheduleEditor()" class="px-6 py-2.5 rounded-2xl bg-sage text-white font-display font-bold text-sm hover:bg-sageDark transition">
+                    Done Editing
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== PARENT / CAREGIVER SETTINGS MODAL ==================== -->
+    <div id="settings-modal" class="hidden fixed inset-0 z-50 bg-ink/40 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white border-2 border-softSand rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-xl space-y-6">
+            <div class="flex items-center justify-between border-b border-softSand pb-4">
+                <div class="flex items-center gap-2.5">
+                    <span class="text-2xl">⚙️</span>
+                    <h3 class="font-display font-extrabold text-xl text-ink">Caregiver Settings</h3>
+                </div>
+                <button onclick="closeSettingsModal()" class="w-10 h-10 rounded-xl bg-softSand hover:bg-stone-200 flex items-center justify-center font-bold text-ink">
+                    ✕
+                </button>
+            </div>
+
+            <div class="space-y-5">
+                <!-- Sound Effects Toggle -->
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="font-display font-bold text-ink">Gentle Sound Chimes</p>
+                        <p class="text-xs text-inkMuted">Soft musical tones when tapping steps</p>
+                    </div>
+                    <button id="toggle-sfx-btn" onclick="toggleSoundEffects()" class="w-14 h-8 rounded-full bg-sage p-1 transition flex items-center justify-end">
+                        <span class="w-6 h-6 rounded-full bg-white shadow"></span>
+                    </button>
+                </div>
+
+                <!-- Custom Token Goal Input -->
+                <div class="space-y-1.5">
+                    <label class="font-display font-bold text-ink text-sm">Custom 5-Star Token Board Reward</label>
+                    <div class="flex gap-2">
+                        <input id="settings-custom-goal" type="text" maxlength="32" placeholder="e.g. 10 Mins Swing Time" class="flex-1 px-3.5 py-2 rounded-xl border-2 border-stone-200 text-sm font-medium bg-cream outline-none focus:border-softLavender">
+                        <button onclick="saveCustomTokenGoal()" class="px-4 py-2 rounded-xl bg-softLavenderLight border-2 border-softLavender font-display font-bold text-sm text-ink">
+                            Save
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Voice Narration Speed -->
+                <div class="space-y-2">
+                    <div class="flex justify-between">
+                        <label class="font-display font-bold text-ink">Voice Narration Speed</label>
+                        <span id="speech-rate-label" class="text-sm font-bold text-calmBlueDark">Calm (0.85x)</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="setSpeechRate(0.75)" data-rate="0.75" class="rate-btn py-2 px-3 rounded-xl border-2 text-sm font-bold">Slower</button>
+                        <button onclick="setSpeechRate(0.85)" data-rate="0.85" class="rate-btn py-2 px-3 rounded-xl border-2 text-sm font-bold">Calm</button>
+                        <button onclick="setSpeechRate(1.0)" data-rate="1.0" class="rate-btn py-2 px-3 rounded-xl border-2 text-sm font-bold">Normal</button>
+                    </div>
+                </div>
+
+                <!-- Test Voice Button -->
+                <button onclick="speakText('Hello! This is how my voice sounds. Take your time and have fun learning!')" class="w-full py-3 rounded-2xl bg-calmBlueLight border-2 border-calmBlue font-display font-bold text-ink hover:brightness-95 transition">
+                    🔊 Test Voice Narration
+                </button>
+
+                <!-- Reset Progress Section (Two-step safe confirmation without window.confirm) -->
+                <div class="pt-3 border-t border-softSand">
+                    <div id="reset-initial-box">
+                        <button onclick="showResetConfirm()" class="w-full py-3 rounded-2xl bg-softCoralLight border-2 border-softCoral text-rose-900 font-display font-bold text-sm hover:brightness-95 transition">
+                            Reset All Stars & Progress
+                        </button>
+                    </div>
+                    <div id="reset-confirm-box" class="hidden bg-softCoralLight border-2 border-softCoral rounded-2xl p-3 space-y-2 text-center">
+                        <p class="text-sm font-bold text-rose-900">Are you sure you want to clear all stars?</p>
+                        <div class="flex gap-2 justify-center">
+                            <button onclick="confirmResetProgress()" class="px-4 py-1.5 rounded-xl bg-softCoral text-white font-bold text-sm">Yes, Reset</button>
+                            <button onclick="cancelResetConfirm()" class="px-4 py-1.5 rounded-xl bg-white border border-stone-300 text-ink font-bold text-sm">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== JAVASCRIPT APPLICATION LOGIC ==================== -->
+    <script>
+        /* ------------------------------------------------------------------
+           1. STATE MANAGEMENT & LOCALSTORAGE PERSISTENCE
+        ------------------------------------------------------------------ */
+        const STORAGE_KEY = 'stepByStepBuddy_v2';
+
+        const defaultScheduleItems = [
+            { id: 'sc_1', period: 'morning', emoji: '🌞', title: 'Wake Up & Stretch', done: false },
+            { id: 'sc_2', period: 'morning', emoji: '🪥', title: 'Brush Teeth', done: false },
+            { id: 'sc_3', period: 'morning', emoji: '👕', title: 'Get Dressed', done: false },
+            { id: 'sc_4', period: 'morning', emoji: '🥣', title: 'Eat Breakfast', done: false },
+            { id: 'sc_5', period: 'afternoon', emoji: '🎒', title: 'School & Learning Play', done: false },
+            { id: 'sc_6', period: 'afternoon', emoji: '🧼', title: 'Wash Hands', done: false },
+            { id: 'sc_7', period: 'afternoon', emoji: '🥪', title: 'Eat Lunch', done: false },
+            { id: 'sc_8', period: 'evening', emoji: '🛁', title: 'Take a Warm Bath', done: false },
+            { id: 'sc_9', period: 'evening', emoji: '🛌', title: 'Put On Pajamas', done: false },
+            { id: 'sc_10', period: 'evening', emoji: '📖', title: 'Story & Bedtime', done: false }
+        ];
+
+        const defaultState = {
+            stars: 0,
+            tokenCount: 0,
+            tokenGoal: '📚 Extra Story Time',
+            unlockedStickers: [],
+            quietMode: false,
+            soundEffects: true,
+            speechRate: 0.85,
+            activeSchedulePeriod: 'morning',
+            scheduleItems: defaultScheduleItems,
+            firstThen: {
+                firstEmoji: '🪥',
+                firstTitle: 'Brush Teeth',
+                thenEmoji: '🧱',
+                thenTitle: 'Play with Blocks',
+                completed: false
+            },
+            activeSequenceId: 'teeth',
+            sequenceViewMode: 'focus',
+            focusStepIndex: 0,
+            completedSteps: {
+                teeth: [],
+                hands: [],
+                dressed: [],
+                bath: [],
+                toilet: []
+            },
+            sequencesCompletedCount: 0,
+            weatherWinsCount: 0,
+            handwashWinsCount: 0
+        };
+
+        let appState = loadState();
+
+        function loadState() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    return {
+                        ...defaultState,
+                        ...parsed,
+                        firstThen: { ...defaultState.firstThen, ...(parsed.firstThen || {}) },
+                        completedSteps: { ...defaultState.completedSteps, ...(parsed.completedSteps || {}) }
+                    };
+                }
+            } catch (e) {
+                console.warn('Could not load saved state:', e);
+            }
+            return JSON.parse(JSON.stringify(defaultState));
+        }
+
+        function saveState() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+            } catch (e) {
+                console.warn('Could not save state:', e);
+            }
+            updateGlobalUI();
+        }
+
+        /* ------------------------------------------------------------------
+           2. SENSORY-FRIENDLY AUDIO (TONE.JS) & TEXT-TO-SPEECH (WEB SPEECH)
+        ------------------------------------------------------------------ */
+        let softSynth = null;
+
+        async function playGentleChime(type = 'step') {
+            if (!appState.soundEffects || appState.quietMode) return;
+            try {
+                if (Tone.context.state !== 'running') {
+                    await Tone.start();
+                }
+                if (!softSynth) {
+                    softSynth = new Tone.PolySynth(Tone.Synth, {
+                        oscillator: { type: 'sine' },
+                        envelope: { attack: 0.04, decay: 0.25, sustain: 0.1, release: 0.8 },
+                        volume: -12
+                    }).toDestination();
+                }
+                const now = Tone.now();
+                if (type === 'step') {
+                    softSynth.triggerAttackRelease('C5', '8n', now);
+                    softSynth.triggerAttackRelease('E5', '8n', now + 0.12);
+                } else if (type === 'complete') {
+                    softSynth.triggerAttackRelease('C5', '8n', now);
+                    softSynth.triggerAttackRelease('E5', '8n', now + 0.12);
+                    softSynth.triggerAttackRelease('G5', '4n', now + 0.24);
+                } else if (type === 'gentleTryAgain') {
+                    softSynth.triggerAttackRelease('E4', '8n', now);
+                    softSynth.triggerAttackRelease('D4', '8n', now + 0.15);
+                }
+            } catch (err) {
+                // Fail silently if audio blocked
+            }
+        }
+
+        function speakText(text) {
+            if (!('speechSynthesis' in window)) return;
+            try {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-US';
+                utterance.rate = appState.speechRate || 0.85;
+                utterance.pitch = 1.05;
+
+                // Prefer a clear, natural English voice if available
+                const voices = window.speechSynthesis.getVoices();
+                const preferredVoice = voices.find(v => v.lang.startsWith('en') && (v.name.includes('Samantha') || v.name.includes('Google US English') || v.name.includes('Natural')));
+                if (preferredVoice) {
+                    utterance.voice = preferredVoice;
+                }
+                window.speechSynthesis.speak(utterance);
+            } catch (e) {
+                console.warn('Speech synthesis unavailable:', e);
+            }
+        }
+
+        // Preload voices on browsers that load them asynchronously
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+        }
+
+        /* ------------------------------------------------------------------
+           3. GENTLE TOAST & STAR REWARDS
+        ------------------------------------------------------------------ */
+        let toastTimeout = null;
+
+        function showGentleToast(icon, title, message) {
+            const toast = document.getElementById('gentle-toast');
+            document.getElementById('toast-icon').textContent = icon;
+            document.getElementById('toast-title').textContent = title;
+            document.getElementById('toast-message').textContent = message;
+
+            toast.classList.remove('opacity-0');
+            toast.classList.add('opacity-100');
+
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('opacity-100');
+                toast.classList.add('opacity-0');
+            }, 3200);
+        }
+
+        function awardStars(amount, reasonText) {
+            appState.stars += amount;
+            // Also fill 5-Star Token Board slots (up to 5)
+            appState.tokenCount = Math.min(5, (appState.tokenCount || 0) + amount);
+            saveState();
+            showGentleToast('⭐', `+${amount} Star${amount > 1 ? 's' : ''} Earned!`, reasonText);
+        }
+
+        /* ------------------------------------------------------------------
+           4. NAVIGATION & GLOBAL SENSORY CONTROLS
+        ------------------------------------------------------------------ */
+        let currentView = 'schedule';
+
+        function navigateTo(viewId) {
+            currentView = viewId;
+            const views = ['schedule', 'firstthen', 'sequences', 'minigames', 'rewards'];
+            views.forEach(v => {
+                const el = document.getElementById(`view-${v}`);
+                if (el) el.classList.toggle('hidden', v !== viewId);
+            });
+
+            // Highlight active nav pill
+            document.querySelectorAll('.nav-pill').forEach(btn => {
+                const isActive = btn.dataset.nav === viewId;
+                if (isActive) {
+                    btn.classList.add('bg-sageLight', 'border-sage', 'text-ink');
+                    btn.classList.remove('bg-white', 'border-softSand', 'text-inkMuted');
+                } else {
+                    btn.classList.remove('bg-sageLight', 'border-sage', 'text-ink');
+                    btn.classList.add('bg-white', 'border-softSand', 'text-inkMuted');
+                }
+            });
+
+            if (viewId === 'schedule') renderScheduleView();
+            if (viewId === 'firstthen') renderFirstThenView();
+            if (viewId === 'sequences') renderSequencesView();
+            if (viewId === 'minigames') renderWeatherView();
+            if (viewId === 'rewards') renderRewardsView();
+
+            window.scrollTo({ top: 0, behavior: appState.quietMode ? 'auto' : 'smooth' });
+        }
+
+        function toggleQuietMode() {
+            appState.quietMode = !appState.quietMode;
+            saveState();
+            if (appState.quietMode) {
+                window.speechSynthesis.cancel();
+                showGentleToast('🌿', 'Calm Mode On', 'Animations and chimes are paused for quiet focus.');
+            } else {
+                showGentleToast('☀️', 'Calm Mode Off', 'Gentle chimes and animations are turned back on.');
+            }
+        }
+
+        function updateGlobalUI() {
+            // Update Star Counters
+            document.getElementById('header-star-count').textContent = appState.stars;
+            const rewardsTotal = document.getElementById('rewards-total-stars');
+            if (rewardsTotal) rewardsTotal.textContent = appState.stars;
+
+            // Apply Quiet Mode Class
+            document.body.classList.toggle('quiet-mode', appState.quietMode);
+            const qBtn = document.getElementById('quiet-mode-btn');
+            const qIcon = document.getElementById('quiet-mode-icon');
+            const qLabel = document.getElementById('quiet-mode-label');
+
+            qBtn.setAttribute('aria-pressed', appState.quietMode);
+            if (appState.quietMode) {
+                qBtn.classList.remove('bg-calmBlueLight', 'border-calmBlue');
+                qBtn.classList.add('bg-sageLight', 'border-sage');
+                qIcon.textContent = '🤫';
+                qLabel.textContent = 'Calm Mode: On';
+            } else {
+                qBtn.classList.add('bg-calmBlueLight', 'border-calmBlue');
+                qBtn.classList.remove('bg-sageLight', 'border-sage');
+                qIcon.textContent = '🌿';
+                qLabel.textContent = 'Calm Mode: Off';
+            }
+
+            // Update Settings Modal Controls
+            const sfxBtn = document.getElementById('toggle-sfx-btn');
+            if (sfxBtn) {
+                sfxBtn.classList.toggle('bg-sage', appState.soundEffects);
+                sfxBtn.classList.toggle('justify-end', appState.soundEffects);
+                sfxBtn.classList.toggle('bg-stone-300', !appState.soundEffects);
+                sfxBtn.classList.toggle('justify-start', !appState.soundEffects);
+            }
+
+            const rateLabel = document.getElementById('speech-rate-label');
+            if (rateLabel) {
+                const map = { 0.75: 'Slower (0.75x)', 0.85: 'Calm (0.85x)', 1.0: 'Normal (1.0x)' };
+                rateLabel.textContent = map[appState.speechRate] || 'Calm (0.85x)';
+            }
+
+            document.querySelectorAll('.rate-btn').forEach(btn => {
+                const match = parseFloat(btn.dataset.rate) === appState.speechRate;
+                btn.classList.toggle('bg-calmBlueLight', match);
+                btn.classList.toggle('border-calmBlue', match);
+                btn.classList.toggle('border-stone-200', !match);
+            });
+        }
+
+        /* ------------------------------------------------------------------
+           5. MODULE 1: VISUAL SCHEDULE (DAILY ROUTINE TIMELINE)
+        ------------------------------------------------------------------ */
+        function setSchedulePeriod(period) {
+            appState.activeSchedulePeriod = period;
+            saveState();
+            renderScheduleView();
+        }
+
+        function getFilteredScheduleItems() {
+            if (appState.activeSchedulePeriod === 'all') {
+                return appState.scheduleItems;
+            }
+            return appState.scheduleItems.filter(item => item.period === appState.activeSchedulePeriod);
+        }
+
+        function renderScheduleView() {
+            // Update period filter buttons
+            document.querySelectorAll('.sched-period-btn').forEach(btn => {
+                const active = btn.dataset.period === appState.activeSchedulePeriod;
+                btn.className = `sched-period-btn px-4 py-2 rounded-2xl border-2 font-display font-bold text-sm flex items-center gap-1.5 transition ${
+                    active ? 'bg-sageLight border-sage text-ink shadow-sm' : 'bg-cream border-softSand text-inkMuted hover:bg-softSand'
+                }`;
+            });
+
+            const items = getFilteredScheduleItems();
+            const todoItems = items.filter(i => !i.done);
+            const doneItems = items.filter(i => i.done);
+
+            document.getElementById('schedule-remaining-badge').textContent = `${todoItems.length} Left`;
+            document.getElementById('schedule-done-badge').textContent = `${doneItems.length} Finished`;
+
+            const todoContainer = document.getElementById('schedule-todo-list');
+            todoContainer.innerHTML = '';
+
+            if (todoItems.length === 0) {
+                todoContainer.innerHTML = `
+                    <div class="bg-white border-2 border-sage rounded-3xl p-8 text-center space-y-2">
+                        <div class="text-5xl">🎉</div>
+                        <h4 class="font-display font-extrabold text-xl text-ink">Everything in this schedule is All Done!</h4>
+                        <p class="text-sm text-inkMuted">Great job following your visual schedule today.</p>
+                    </div>
+                `;
+            } else {
+                const periodLabels = { morning: '🌅 Morning', afternoon: '☀️ Afternoon', evening: '🌙 Evening' };
+                todoItems.forEach((item, idx) => {
+                    const isCurrent = idx === 0;
+                    const card = document.createElement('div');
+                    card.className = `rounded-3xl border-2 p-4 sm:p-5 transition flex flex-wrap sm:flex-nowrap items-center justify-between gap-4 ${
+                        isCurrent
+                            ? 'bg-softYellowLight/80 border-softYellow shadow-sm'
+                            : 'bg-white border-softSand'
+                    }`;
+
+                    card.innerHTML = `
+                        <div class="flex items-center gap-4">
+                            <div class="w-16 h-16 rounded-2xl bg-white border-2 ${isCurrent ? 'border-softYellow' : 'border-softSand'} flex items-center justify-center text-4xl flex-shrink-0">
+                                ${item.emoji}
+                            </div>
+                            <div class="space-y-1">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span class="text-xs font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full ${
+                                        isCurrent ? 'bg-softYellow text-ink' : 'bg-softSand text-inkMuted'
+                                    }">
+                                        ${isCurrent ? '⭐ Current Activity' : 'Up Next'}
+                                    </span>
+                                    <span class="text-xs font-bold text-inkMuted">${periodLabels[item.period] || ''}</span>
+                                </div>
+                                <h4 class="font-display font-extrabold text-lg sm:text-xl text-ink">${item.title}</h4>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+                            <button onclick="speakText('${isCurrent ? 'Current activity: ' : 'Up next: '}${item.title}')" class="px-3.5 py-3 rounded-2xl bg-calmBlueLight hover:brightness-95 border-2 border-calmBlue font-display font-bold text-sm text-ink transition">
+                                🔊 Listen
+                            </button>
+                            <button onclick="toggleScheduleItemDone('${item.id}')" class="px-5 py-3 rounded-2xl bg-sage hover:bg-sageDark text-white font-display font-extrabold text-sm sm:text-base transition shadow-sm flex items-center gap-1.5">
+                                <span>✅</span> Mark Done
+                            </button>
+                        </div>
+                    `;
+                    todoContainer.appendChild(card);
+                });
+            }
+
+            // Render All Done Pocket
+            const doneContainer = document.getElementById('schedule-done-list');
+            doneContainer.innerHTML = '';
+
+            if (doneItems.length === 0) {
+                doneContainer.innerHTML = `
+                    <div class="border-2 border-dashed border-sage/60 rounded-2xl p-6 text-center text-sm text-inkMuted">
+                        Finished tasks will appear here!
+                    </div>
+                `;
+            } else {
+                doneItems.forEach(item => {
+                    const row = document.createElement('button');
+                    row.onclick = () => toggleScheduleItemDone(item.id);
+                    row.title = 'Tap to move back to schedule';
+                    row.className = 'w-full bg-white/90 hover:bg-white border-2 border-sage rounded-2xl p-3 flex items-center justify-between gap-3 text-left transition';
+                    row.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">${item.emoji}</span>
+                            <span class="font-display font-bold text-sm sm:text-base text-ink line-through decoration-sage decoration-2">${item.title}</span>
+                        </div>
+                        <span class="text-xs font-extrabold bg-sageLight text-sageDark px-2.5 py-1 rounded-full">All Done!</span>
+                    `;
+                    doneContainer.appendChild(row);
+                });
+            }
+        }
+
+        function toggleScheduleItemDone(itemId) {
+            const item = appState.scheduleItems.find(i => i.id === itemId);
+            if (!item) return;
+
+            item.done = !item.done;
+            if (item.done) {
+                playGentleChime('step');
+                awardStars(1, `Finished: ${item.title}`);
+
+                // Announce what is next
+                const remaining = getFilteredScheduleItems().filter(i => !i.done);
+                if (remaining.length > 0) {
+                    speakText(`${item.title} is all done! Next up is ${remaining[0].title}.`);
+                } else {
+                    playGentleChime('complete');
+                    speakText(`${item.title} is all done! You finished your schedule!`);
+                }
+            }
+            saveState();
+            renderScheduleView();
+        }
+
+        function resetSchedulePeriod() {
+            appState.scheduleItems.forEach(item => {
+                if (appState.activeSchedulePeriod === 'all' || item.period === appState.activeSchedulePeriod) {
+                    item.done = false;
+                }
+            });
+            saveState();
+            renderScheduleView();
+            speakText('Schedule reset. Ready to start!');
+        }
+
+        function readScheduleAloud() {
+            const todo = getFilteredScheduleItems().filter(i => !i.done);
+            if (todo.length === 0) {
+                speakText('All activities in this schedule are finished! Great job!');
+            } else if (todo.length === 1) {
+                speakText(`Current activity is ${todo[0].title}.`);
+            } else {
+                speakText(`Current activity is ${todo[0].title}. Up next is ${todo[1].title}.`);
+            }
+        }
+
+        // Schedule Customizer Modal Functions
+        function openScheduleEditor() {
+            document.getElementById('schedule-editor-modal').classList.remove('hidden');
+            renderScheduleEditorList();
+        }
+
+        function closeScheduleEditor() {
+            document.getElementById('schedule-editor-modal').classList.add('hidden');
+            renderScheduleView();
+        }
+
+        function renderScheduleEditorList() {
+            const list = document.getElementById('schedule-editor-list');
+            list.innerHTML = '';
+            const periodTag = { morning: 'Morning', afternoon: 'Afternoon', evening: 'Evening' };
+
+            appState.scheduleItems.forEach((item, index) => {
+                const row = document.createElement('div');
+                row.className = 'bg-cream border border-stone-200 rounded-2xl p-3 flex items-center justify-between gap-2';
+                row.innerHTML = `
+                    <div class="flex items-center gap-2.5">
+                        <span class="text-2xl">${item.emoji}</span>
+                        <div>
+                            <div class="font-display font-bold text-sm text-ink">${item.title}</div>
+                            <div class="text-xs text-inkMuted">${periodTag[item.period] || ''}</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <button onclick="moveScheduleItem(${index}, -1)" ${index === 0 ? 'disabled' : ''} class="p-1.5 rounded-lg bg-white border border-stone-200 text-xs font-bold disabled:opacity-30" title="Move Up">⬆️</button>
+                        <button onclick="moveScheduleItem(${index}, 1)" ${index === appState.scheduleItems.length - 1 ? 'disabled' : ''} class="p-1.5 rounded-lg bg-white border border-stone-200 text-xs font-bold disabled:opacity-30" title="Move Down">⬇️</button>
+                        <button onclick="deleteScheduleItem('${item.id}')" class="p-1.5 rounded-lg bg-softCoralLight border border-softCoral text-xs font-bold text-rose-900" title="Remove">🗑️</button>
+                    </div>
+                `;
+                list.appendChild(row);
+            });
+        }
+
+        function addCustomScheduleItem() {
+            const emoji = document.getElementById('new-sched-emoji').value;
+            const titleInput = document.getElementById('new-sched-title');
+            const period = document.getElementById('new-sched-period').value;
+            const title = titleInput.value.trim();
+
+            if (!title) {
+                showGentleToast('✏️', 'Enter a Name', 'Please type an activity name first.');
+                return;
+            }
+
+            appState.scheduleItems.push({
+                id: 'sc_' + Date.now(),
+                period,
+                emoji,
+                title,
+                done: false
+            });
+            titleInput.value = '';
+            saveState();
+            renderScheduleEditorList();
+            showGentleToast('✅', 'Added!', `${title} added to your visual schedule.`);
+        }
+
+        function moveScheduleItem(index, direction) {
+            const target = index + direction;
+            if (target < 0 || target >= appState.scheduleItems.length) return;
+            const temp = appState.scheduleItems[index];
+            appState.scheduleItems[index] = appState.scheduleItems[target];
+            appState.scheduleItems[target] = temp;
+            saveState();
+            renderScheduleEditorList();
+        }
+
+        function deleteScheduleItem(id) {
+            appState.scheduleItems = appState.scheduleItems.filter(i => i.id !== id);
+            saveState();
+            renderScheduleEditorList();
+        }
+
+        /* ------------------------------------------------------------------
+           6. MODULE 2: FIRST / THEN BOARD
+        ------------------------------------------------------------------ */
+        const firstTaskPresets = [
+            { emoji: '🪥', title: 'Brush Teeth' },
+            { emoji: '👟', title: 'Put on Shoes' },
+            { emoji: '🧼', title: 'Wash Hands' },
+            { emoji: '🧸', title: 'Put Toys Away' },
+            { emoji: '👕', title: 'Get Dressed' },
+            { emoji: '🎒', title: 'Pack School Bag' }
+        ];
+
+        const thenRewardPresets = [
+            { emoji: '📱', title: '5 Mins Tablet' },
+            { emoji: '🧱', title: 'Play with Blocks' },
+            { emoji: '📖', title: 'Read a Story' },
+            { emoji: '🫧', title: 'Bubble Time' },
+            { emoji: '🎵', title: 'Listen to Music' },
+            { emoji: '🍎', title: 'Snack Time' }
+        ];
+
+        function renderFirstThenView() {
+            const ft = appState.firstThen;
+
+            document.getElementById('ft-first-emoji').textContent = ft.firstEmoji;
+            document.getElementById('ft-first-title').textContent = ft.firstTitle;
+            document.getElementById('ft-then-emoji').textContent = ft.thenEmoji;
+            document.getElementById('ft-then-title').textContent = ft.thenTitle;
+
+            const firstPanel = document.getElementById('ft-first-panel');
+            const thenPanel = document.getElementById('ft-then-panel');
+            const firstStatus = document.getElementById('ft-first-status');
+            const thenStatus = document.getElementById('ft-then-status');
+            const completeBtn = document.getElementById('ft-complete-btn');
+            const rewardBanner = document.getElementById('ft-reward-banner');
+
+            if (ft.completed) {
+                firstPanel.className = 'md:col-span-5 bg-sageLight/70 border-4 border-sage rounded-3xl p-6 flex flex-col justify-between items-center text-center shadow-sm transition-all';
+                firstStatus.textContent = '✅ All Done!';
+                firstStatus.className = 'text-xs font-bold bg-white text-sageDark px-3 py-1 rounded-full border border-sage';
+                completeBtn.innerHTML = '<span>🌟</span> Finished! (+2 Stars)';
+                completeBtn.className = 'w-full py-4 px-6 rounded-2xl bg-sageDark text-white font-display font-extrabold text-lg sm:text-xl shadow-sm transition flex items-center justify-center gap-2';
+
+                thenPanel.className = 'md:col-span-5 bg-softYellowLight border-4 border-softYellow rounded-3xl p-6 flex flex-col justify-between items-center text-center shadow-md transition-all animate-soft-pulse';
+                thenStatus.textContent = '🎉 Unlocked!';
+                thenStatus.className = 'text-xs font-bold bg-sage text-white px-3 py-1 rounded-full';
+                rewardBanner.innerHTML = `🎉 Yay! Enjoy <strong>${ft.thenTitle}</strong> now!`;
+                rewardBanner.className = 'w-full py-3.5 px-4 rounded-2xl bg-white border-2 border-sage font-display font-extrabold text-sm sm:text-base text-sageDark';
+            } else {
+                firstPanel.className = 'md:col-span-5 bg-calmBlueLight/70 border-4 border-calmBlue rounded-3xl p-6 flex flex-col justify-between items-center text-center shadow-sm transition-all';
+                firstStatus.textContent = 'To Do';
+                firstStatus.className = 'text-xs font-bold bg-white text-calmBlueDark px-3 py-1 rounded-full border border-calmBlue';
+                completeBtn.innerHTML = '<span>✅</span> I Did It!';
+                completeBtn.className = 'w-full py-4 px-6 rounded-2xl bg-sage hover:bg-sageDark text-white font-display font-extrabold text-lg sm:text-xl shadow-sm transition flex items-center justify-center gap-2';
+
+                thenPanel.className = 'md:col-span-5 bg-softYellowLight/60 border-4 border-softYellow/70 rounded-3xl p-6 flex flex-col justify-between items-center text-center shadow-sm transition-all';
+                thenStatus.textContent = '🔒 Waiting for First';
+                thenStatus.className = 'text-xs font-bold bg-white text-amber-800 px-3 py-1 rounded-full border border-softYellow';
+                rewardBanner.innerHTML = 'Finish FIRST to unlock your reward (+2 ⭐)';
+                rewardBanner.className = 'w-full py-3.5 px-4 rounded-2xl bg-white/90 border-2 border-softYellow font-display font-bold text-sm sm:text-base text-inkMuted';
+            }
+
+            // Render FIRST presets
+            const firstGrid = document.getElementById('ft-first-presets');
+            firstGrid.innerHTML = '';
+            firstTaskPresets.forEach(item => {
+                const selected = ft.firstTitle === item.title;
+                const btn = document.createElement('button');
+                btn.onclick = () => selectFirstPreset(item);
+                btn.className = `p-3 rounded-2xl border-2 text-center transition flex flex-col items-center gap-1 ${
+                    selected ? 'bg-calmBlueLight border-calmBlue text-ink shadow-sm' : 'bg-cream hover:bg-softSand border-softSand text-ink'
+                }`;
+                btn.innerHTML = `<span class="text-2xl">${item.emoji}</span><span class="font-display font-bold text-xs leading-tight">${item.title}</span>`;
+                firstGrid.appendChild(btn);
+            });
+
+            // Render THEN presets
+            const thenGrid = document.getElementById('ft-then-presets');
+            thenGrid.innerHTML = '';
+            thenRewardPresets.forEach(item => {
+                const selected = ft.thenTitle === item.title;
+                const btn = document.createElement('button');
+                btn.onclick = () => selectThenPreset(item);
+                btn.className = `p-3 rounded-2xl border-2 text-center transition flex flex-col items-center gap-1 ${
+                    selected ? 'bg-softYellowLight border-softYellow text-ink shadow-sm' : 'bg-cream hover:bg-softSand border-softSand text-ink'
+                }`;
+                btn.innerHTML = `<span class="text-2xl">${item.emoji}</span><span class="font-display font-bold text-xs leading-tight">${item.title}</span>`;
+                thenGrid.appendChild(btn);
+            });
+        }
+
+        function selectFirstPreset(item) {
+            appState.firstThen.firstEmoji = item.emoji;
+            appState.firstThen.firstTitle = item.title;
+            appState.firstThen.completed = false;
+            saveState();
+            renderFirstThenView();
+            readFirstThenBoard();
+        }
+
+        function selectThenPreset(item) {
+            appState.firstThen.thenEmoji = item.emoji;
+            appState.firstThen.thenTitle = item.title;
+            appState.firstThen.completed = false;
+            saveState();
+            renderFirstThenView();
+            readFirstThenBoard();
+        }
+
+        function applyCustomFirstTask() {
+            const input = document.getElementById('ft-custom-first-input');
+            const val = input.value.trim();
+            if (!val) return;
+            appState.firstThen.firstEmoji = '⭐';
+            appState.firstThen.firstTitle = val;
+            appState.firstThen.completed = false;
+            input.value = '';
+            saveState();
+            renderFirstThenView();
+            readFirstThenBoard();
+        }
+
+        function applyCustomThenReward() {
+            const input = document.getElementById('ft-custom-then-input');
+            const val = input.value.trim();
+            if (!val) return;
+            appState.firstThen.thenEmoji = '🎁';
+            appState.firstThen.thenTitle = val;
+            appState.firstThen.completed = false;
+            input.value = '';
+            saveState();
+            renderFirstThenView();
+            readFirstThenBoard();
+        }
+
+        function readFirstThenBoard() {
+            const ft = appState.firstThen;
+            speakText(`First, ${ft.firstTitle}. Then, ${ft.thenTitle}!`);
+        }
+
+        function completeFirstThenTask() {
+            if (appState.firstThen.completed) {
+                speakText(`You already finished ${appState.firstThen.firstTitle}! Enjoy ${appState.firstThen.thenTitle}!`);
+                return;
+            }
+            appState.firstThen.completed = true;
+            playGentleChime('complete');
+            awardStars(2, `First ${appState.firstThen.firstTitle}, Then ${appState.firstThen.thenTitle}!`);
+            renderFirstThenView();
+            speakText(`Awesome job! You finished ${appState.firstThen.firstTitle}! Now it is time for ${appState.firstThen.thenTitle}!`);
+        }
+
+        function resetFirstThenBoard() {
+            appState.firstThen.completed = false;
+            saveState();
+            renderFirstThenView();
+            readFirstThenBoard();
+        }
+
+        /* ------------------------------------------------------------------
+           7. MODULE 3: STEP-BY-STEP TASK SEQUENCES (FOCUS & STRIP MODES)
+        ------------------------------------------------------------------ */
+        const taskSequencesData = {
+            teeth: {
+                id: 'teeth',
+                title: 'Brushing Teeth',
+                icon: '🪥',
+                steps: [
+                    { emoji: '🪥', title: '1. Get Toothbrush', text: 'Pick up your toothbrush and wet the bristles with water.' },
+                    { emoji: '🧴', title: '2. Add Toothpaste', text: 'Squeeze a small pea-sized dot of toothpaste onto the brush.' },
+                    { emoji: '😁', title: '3. Brush Gently', text: 'Brush your top teeth, bottom teeth, and back teeth in gentle circles.' },
+                    { emoji: '💧', title: '4. Rinse Mouth', text: 'Take a sip of water, swish it around, and spit into the sink.' },
+                    { emoji: '✨', title: '5. Put Away', text: 'Rinse your toothbrush with water and put it back in its cup.' }
+                ]
+            },
+            hands: {
+                id: 'hands',
+                title: 'Washing Hands',
+                icon: '🧼',
+                steps: [
+                    { emoji: '💧', title: '1. Wet Hands', text: 'Turn on the tap and wet both hands with clean water.' },
+                    { emoji: '🧼', title: '2. Put On Soap', text: 'Pump soap onto your hands.' },
+                    { emoji: '🫧', title: '3. Rub & Scrub', text: 'Rub palms, backs of hands, and between fingers for 20 seconds.' },
+                    { emoji: '🚿', title: '4. Rinse Soap Off', text: 'Hold hands under clean running water until all bubbles are gone.' },
+                    { emoji: '🧻', title: '5. Dry Hands', text: 'Turn off the tap and dry your hands with a clean towel.' }
+                ]
+            },
+            dressed: {
+                id: 'dressed',
+                title: 'Getting Dressed',
+                icon: '👕',
+                steps: [
+                    { emoji: '🩲', title: '1. Underwear', text: 'Step into clean underwear and pull them up comfortably.' },
+                    { emoji: '👕', title: '2. Put On Shirt', text: 'Put your head and arms through your shirt.' },
+                    { emoji: '👖', title: '3. Put On Pants', text: 'Put one leg in at a time and pull your pants up to your waist.' },
+                    { emoji: '🧦', title: '4. Put On Socks', text: 'Pull a sock over each foot up to your ankles.' },
+                    { emoji: '👟', title: '5. Put On Shoes', text: 'Put your feet into your shoes and fasten the straps or laces.' }
+                ]
+            },
+            bath: {
+                id: 'bath',
+                title: 'Bath Time',
+                icon: '🛁',
+                steps: [
+                    { emoji: '🌡️', title: '1. Check Water', text: 'Make sure the water feels warm and comfortable, not too hot.' },
+                    { emoji: '🚿', title: '2. Wet Body & Hair', text: 'Gently pour water over your shoulders, arms, and hair.' },
+                    { emoji: '🧽', title: '3. Wash With Soap', text: 'Use gentle body wash and shampoo to clean from head to toe.' },
+                    { emoji: '💦', title: '4. Rinse All Soap', text: 'Rinse off all the soap and shampoo bubbles with clean water.' },
+                    { emoji: '🧣', title: '5. Dry With Towel', text: 'Step out carefully and wrap up in a soft, dry towel.' }
+                ]
+            },
+            toilet: {
+                id: 'toilet',
+                title: 'Using the Toilet',
+                icon: '🚽',
+                steps: [
+                    { emoji: '👖', title: '1. Pull Pants Down', text: 'Pull your pants and underwear down before sitting.' },
+                    { emoji: '🚽', title: '2. Sit & Go', text: 'Sit calmly on the toilet and take your time.' },
+                    { emoji: '🧻', title: '3. Wipe Clean', text: 'Use toilet paper to wipe until clean and drop paper in the toilet.' },
+                    { emoji: '🌊', title: '4. Flush & Dress', text: 'Press the flush handle and pull your pants back up.' },
+                    { emoji: '🧼', title: '5. Wash Hands', text: 'Wash your hands with soap and water and dry them.' }
+                ]
+            }
+        };
+
+        function selectSequence(seqId) {
+            appState.activeSequenceId = seqId;
+            const completed = appState.completedSteps[seqId] || [];
+            const total = taskSequencesData[seqId].steps.length;
+            // Jump focus pointer to first uncompleted step
+            let firstIncomplete = 0;
+            while (firstIncomplete < total - 1 && completed.includes(firstIncomplete)) {
+                firstIncomplete++;
+            }
+            appState.focusStepIndex = firstIncomplete;
+            saveState();
+            renderSequencesView();
+            const seq = taskSequencesData[seqId];
+            speakText(`${seq.title}. ${seq.steps[appState.focusStepIndex].title}. ${seq.steps[appState.focusStepIndex].text}`);
+        }
+
+        function setSequenceViewMode(mode) {
+            appState.sequenceViewMode = mode;
+            saveState();
+            renderSequencesView();
+        }
+
+        function renderSequencesView() {
+            // Update Focus vs Strip Mode buttons
+            const focusBtn = document.getElementById('seq-mode-focus-btn');
+            const stripBtn = document.getElementById('seq-mode-strip-btn');
+            const isFocus = appState.sequenceViewMode === 'focus';
+
+            focusBtn.className = `px-3.5 py-2 rounded-xl font-display font-bold text-xs sm:text-sm transition ${
+                isFocus ? 'bg-white text-ink shadow-sm' : 'text-inkMuted hover:text-ink'
+            }`;
+            stripBtn.className = `px-3.5 py-2 rounded-xl font-display font-bold text-xs sm:text-sm transition ${
+                !isFocus ? 'bg-white text-ink shadow-sm' : 'text-inkMuted hover:text-ink'
+            }`;
+
+            // Render Sequence Category Tabs
+            const tabsContainer = document.getElementById('sequence-tabs');
+            tabsContainer.innerHTML = '';
+
+            Object.values(taskSequencesData).forEach(seq => {
+                const isSelected = seq.id === appState.activeSequenceId;
+                const doneCount = (appState.completedSteps[seq.id] || []).length;
+                const total = seq.steps.length;
+
+                const btn = document.createElement('button');
+                btn.onclick = () => selectSequence(seq.id);
+                btn.className = `p-3 rounded-2xl border-2 text-left transition flex items-center gap-2.5 ${
+                    isSelected
+                        ? 'bg-sageLight border-sage text-ink shadow-sm'
+                        : 'bg-cream border-softSand text-inkMuted hover:bg-softSand'
+                }`;
+                btn.innerHTML = `
+                    <span class="text-2xl sm:text-3xl">${seq.icon}</span>
+                    <div>
+                        <div class="font-display font-extrabold text-xs sm:text-sm text-ink leading-tight">${seq.title}</div>
+                        <div class="text-xs font-bold text-sageDark mt-0.5">${doneCount}/${total}</div>
+                    </div>
+                `;
+                tabsContainer.appendChild(btn);
+            });
+
+            const activeSeq = taskSequencesData[appState.activeSequenceId];
+            const completedIndices = appState.completedSteps[activeSeq.id] || [];
+
+            // Progress Bar
+            document.getElementById('seq-title-display').textContent = `${activeSeq.icon} ${activeSeq.title}`;
+            document.getElementById('seq-progress-text').textContent = `${completedIndices.length} of ${activeSeq.steps.length} Done`;
+            const pct = Math.round((completedIndices.length / activeSeq.steps.length) * 100);
+            document.getElementById('seq-progress-bar').style.width = `${pct}%`;
+
+            // Completion Banner
+            const allDone = completedIndices.length === activeSeq.steps.length;
+            document.getElementById('seq-complete-box').classList.toggle('hidden', !allDone);
+
+            // Toggle Focus Mode vs Full Strip View
+            const focusContainer = document.getElementById('seq-focus-container');
+            const stripContainer = document.getElementById('seq-strip-container');
+
+            if (isFocus) {
+                focusContainer.classList.remove('hidden');
+                stripContainer.classList.add('hidden');
+
+                const idx = Math.min(appState.focusStepIndex, activeSeq.steps.length - 1);
+                const step = activeSeq.steps[idx];
+                const stepDone = completedIndices.includes(idx);
+
+                document.getElementById('focus-step-counter').textContent = `Step ${idx + 1} of ${activeSeq.steps.length}`;
+                document.getElementById('focus-step-emoji').textContent = step.emoji;
+                document.getElementById('focus-step-title').textContent = step.title;
+                document.getElementById('focus-step-desc').textContent = step.text;
+
+                document.getElementById('focus-prev-btn').disabled = idx === 0;
+                const nextBtn = document.getElementById('focus-next-btn');
+                if (idx === activeSeq.steps.length - 1) {
+                    nextBtn.innerHTML = stepDone ? '<span>🌟</span> All Steps Done!' : '<span>✅</span> Finish Sequence (+3 ⭐)';
+                } else {
+                    nextBtn.innerHTML = '<span>✅</span> Done - Next Step ➡️';
+                }
+            } else {
+                focusContainer.classList.add('hidden');
+                stripContainer.classList.remove('hidden');
+                stripContainer.innerHTML = '';
+
+                activeSeq.steps.forEach((step, index) => {
+                    const isDone = completedIndices.includes(index);
+                    const card = document.createElement('div');
+                    card.className = `rounded-3xl border-2 p-5 transition flex flex-col justify-between gap-4 ${
+                        isDone ? 'bg-sageLight/50 border-sage' : 'bg-white border-softSand shadow-sm'
+                    }`;
+
+                    card.innerHTML = `
+                        <div class="flex items-start gap-3.5">
+                            <div class="w-14 h-14 rounded-2xl ${isDone ? 'bg-white border-sage' : 'bg-softYellowLight border-softYellow'} border-2 flex items-center justify-center text-3xl flex-shrink-0">
+                                ${step.emoji}
+                            </div>
+                            <div class="space-y-1 flex-1">
+                                <h4 class="font-display font-extrabold text-base sm:text-lg text-ink">${step.title}</h4>
+                                <p class="text-inkMuted text-xs sm:text-sm leading-relaxed">${step.text}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 pt-1">
+                            <button onclick="speakText('${step.title}. ${step.text}')" class="px-3.5 py-2.5 rounded-2xl bg-calmBlueLight hover:brightness-95 border-2 border-calmBlue font-display font-bold text-xs sm:text-sm text-ink transition">
+                                🔊 Listen
+                            </button>
+                            <button onclick="toggleSequenceStep(${index})" class="flex-1 py-2.5 px-3 rounded-2xl font-display font-extrabold text-xs sm:text-sm border-2 transition flex items-center justify-center gap-1.5 ${
+                                isDone ? 'bg-sage text-white border-sage' : 'bg-softSand hover:bg-sageLight text-ink border-stone-300'
+                            }">
+                                <span>${isDone ? '✅' : '⬜'}</span>
+                                <span>${isDone ? 'Done!' : 'Mark Done'}</span>
+                            </button>
+                        </div>
+                    `;
+                    stripContainer.appendChild(card);
+                });
+            }
+        }
+
+        function speakFocusedStep() {
+            const activeSeq = taskSequencesData[appState.activeSequenceId];
+            const step = activeSeq.steps[appState.focusStepIndex];
+            speakText(`${step.title}. ${step.text}`);
+        }
+
+        function prevFocusStep() {
+            if (appState.focusStepIndex > 0) {
+                appState.focusStepIndex -= 1;
+                saveState();
+                renderSequencesView();
+                speakFocusedStep();
+            }
+        }
+
+        function completeFocusedStep() {
+            const sId = appState.activeSequenceId;
+            const activeSeq = taskSequencesData[sId];
+            const idx = appState.focusStepIndex;
+            const list = appState.completedSteps[sId] || [];
+
+            if (!list.includes(idx)) {
+                appState.completedSteps[sId] = [...list, idx];
+            }
+
+            if (appState.completedSteps[sId].length === activeSeq.steps.length) {
+                appState.sequencesCompletedCount += 1;
+                playGentleChime('complete');
+                awardStars(3, `Completed ${activeSeq.title} sequence!`);
+                speakText(`Amazing work! You completed ${activeSeq.title} and earned three stars!`);
+            } else {
+                playGentleChime('step');
+                if (idx < activeSeq.steps.length - 1) {
+                    appState.focusStepIndex = idx + 1;
+                    const nextStep = activeSeq.steps[appState.focusStepIndex];
+                    speakText(`Great job! Next, ${nextStep.title}. ${nextStep.text}`);
+                }
+            }
+            saveState();
+            renderSequencesView();
+        }
+
+        function toggleSequenceStep(stepIndex) {
+            const sId = appState.activeSequenceId;
+            const list = appState.completedSteps[sId] || [];
+            const activeSeq = taskSequencesData[sId];
+
+            if (list.includes(stepIndex)) {
+                appState.completedSteps[sId] = list.filter(i => i !== stepIndex);
+            } else {
+                appState.completedSteps[sId] = [...list, stepIndex];
+                const step = activeSeq.steps[stepIndex];
+
+                if (appState.completedSteps[sId].length === activeSeq.steps.length) {
+                    appState.sequencesCompletedCount += 1;
+                    playGentleChime('complete');
+                    awardStars(3, `Completed ${activeSeq.title} sequence!`);
+                    speakText(`Wonderful! You finished ${activeSeq.title} and earned three stars!`);
+                } else {
+                    playGentleChime('step');
+                    speakText(`Good job! ${step.title} is done.`);
+                }
+            }
+            saveState();
+            renderSequencesView();
+        }
+
+        function resetCurrentSequence() {
+            appState.completedSteps[appState.activeSequenceId] = [];
+            appState.focusStepIndex = 0;
+            saveState();
+            renderSequencesView();
+            speakText('Ready to practice again from step 1.');
+        }
+
+        /* ------------------------------------------------------------------
+           8. MODULE 4: MINI-GAMES & PRACTICE (WEATHER + HANDWASHING)
+        ------------------------------------------------------------------ */
+        function switchMiniGame(gameKey) {
+            const isWeather = gameKey === 'weather';
+            document.getElementById('subgame-weather').classList.toggle('hidden', !isWeather);
+            document.getElementById('subgame-handwash').classList.toggle('hidden', isWeather);
+
+            const wBtn = document.getElementById('subgame-btn-weather');
+            const hBtn = document.getElementById('subgame-btn-handwash');
+
+            wBtn.className = `px-5 py-3 rounded-2xl border-2 font-display font-extrabold text-sm sm:text-base flex items-center gap-2 transition ${
+                isWeather ? 'bg-calmBlueLight border-calmBlue text-ink shadow-sm' : 'bg-cream border-softSand text-inkMuted hover:bg-softSand'
+            }`;
+            hBtn.className = `px-5 py-3 rounded-2xl border-2 font-display font-extrabold text-sm sm:text-base flex items-center gap-2 transition ${
+                !isWeather ? 'bg-calmBlueLight border-calmBlue text-ink shadow-sm' : 'bg-cream border-softSand text-inkMuted hover:bg-softSand'
+            }`;
+        }
+
+        const weatherScenarios = {
+            sunny: {
+                id: 'sunny',
+                icon: '☀️',
+                headline: 'It is a Sunny & Warm Day!',
+                subtext: 'Pick 2 light items to stay cool in the sun.',
+                bgClass: 'bg-softYellowLight border-softYellow',
+                neededIds: ['tshirt', 'cap'],
+                speechPrompt: 'It is a sunny and warm day! Pick two light items to stay cool in the sun.'
+            },
+            rainy: {
+                id: 'rainy',
+                icon: '🌧️',
+                headline: 'It is a Rainy Day!',
+                subtext: 'Pick 2 waterproof items to stay dry.',
+                bgClass: 'bg-calmBlueLight border-calmBlue',
+                neededIds: ['raincoat', 'boots'],
+                speechPrompt: 'It is a rainy day! Pick two waterproof items to stay dry.'
+            },
+            cold: {
+                id: 'cold',
+                icon: '❄️',
+                headline: 'It is a Cold & Chilly Day!',
+                subtext: 'Pick 2 warm items to stay cozy.',
+                bgClass: 'bg-sageLight border-sage',
+                neededIds: ['sweater', 'beanie'],
+                speechPrompt: 'It is a cold and chilly day! Pick two warm items to stay cozy.'
+            }
+        };
+
+        const wardrobeItems = [
+            { id: 'tshirt', name: 'Cotton T-Shirt', emoji: '👕', suitableFor: 'sunny' },
+            { id: 'raincoat', name: 'Yellow Raincoat', emoji: '🧥', suitableFor: 'rainy' },
+            { id: 'sweater', name: 'Warm Sweater', emoji: '🧶', suitableFor: 'cold' },
+            { id: 'cap', name: 'Sun Cap', emoji: '🧢', suitableFor: 'sunny' },
+            { id: 'boots', name: 'Rain Boots', emoji: '🥾', suitableFor: 'rainy' },
+            { id: 'beanie', name: 'Wool Hat', emoji: '🧣', suitableFor: 'cold' }
+        ];
+
+        let currentWeatherKey = 'sunny';
+        let equippedItems = [];
+        let weatherScenarioSolved = false;
+
+        function setWeatherScenario(key) {
+            currentWeatherKey = key;
+            equippedItems = [];
+            weatherScenarioSolved = false;
+            renderWeatherView();
+            readWeatherPrompt();
+        }
+
+        function nextWeatherScenario() {
+            const order = ['sunny', 'rainy', 'cold'];
+            const nextIdx = (order.indexOf(currentWeatherKey) + 1) % order.length;
+            setWeatherScenario(order[nextIdx]);
+        }
+
+        function resetWeatherOutfit() {
+            equippedItems = [];
+            weatherScenarioSolved = false;
+            renderWeatherView();
+        }
+
+        function readWeatherPrompt() {
+            const s = weatherScenarios[currentWeatherKey];
+            speakText(s.speechPrompt);
+        }
+
+        function renderWeatherView() {
+            const scenario = weatherScenarios[currentWeatherKey];
+
+            // Update weather tabs
+            ['sunny', 'rainy', 'cold'].forEach(k => {
+                const btn = document.getElementById(`weather-btn-${k}`);
+                const active = k === currentWeatherKey;
+                btn.className = `weather-tab px-4 py-2.5 rounded-2xl border-2 font-display font-bold text-sm sm:text-base flex items-center gap-2 transition ${
+                    active ? 'bg-calmBlueLight border-calmBlue text-ink shadow-sm' : 'bg-cream border-softSand text-inkMuted hover:bg-softSand'
+                }`;
+            });
+
+            // Update stage card
+            const stage = document.getElementById('weather-stage');
+            stage.className = `lg:col-span-7 border-2 rounded-3xl p-6 shadow-sm flex flex-col items-center justify-between min-h-[380px] transition-colors duration-300 ${scenario.bgClass}`;
+
+            document.getElementById('weather-icon-big').textContent = scenario.icon;
+            document.getElementById('weather-headline').textContent = scenario.headline;
+            document.getElementById('weather-subtext').textContent = scenario.subtext;
+
+            // Equipped items display
+            const equippedContainer = document.getElementById('equipped-clothes-display');
+            if (equippedItems.length === 0) {
+                equippedContainer.innerHTML = `<span class="text-sm text-inkMuted font-medium">Tap clothes to put on</span>`;
+            } else {
+                equippedContainer.innerHTML = equippedItems.map(id => {
+                    const item = wardrobeItems.find(w => w.id === id);
+                    return `<div class="bg-white border-2 border-sage rounded-2xl px-3 py-1.5 flex items-center gap-1.5 shadow-sm">
+                        <span class="text-3xl">${item.emoji}</span>
+                        <span class="text-xs font-bold text-ink">${item.name}</span>
+                    </div>`;
+                }).join('');
+            }
+
+            // Success Banner
+            const successBar = document.getElementById('weather-success-bar');
+            successBar.classList.toggle('hidden', !weatherScenarioSolved);
+
+            // Render Wardrobe Grid
+            const grid = document.getElementById('wardrobe-grid');
+            grid.innerHTML = '';
+            wardrobeItems.forEach(item => {
+                const isEquipped = equippedItems.includes(item.id);
+                const btn = document.createElement('button');
+                btn.onclick = () => handleSelectClothing(item);
+                btn.className = `p-4 rounded-2xl border-2 transition flex flex-col items-center justify-center gap-2 text-center ${
+                    isEquipped
+                        ? 'bg-sageLight border-sage text-ink shadow-sm'
+                        : 'bg-cream hover:bg-softSand border-softSand text-ink'
+                }`;
+                btn.innerHTML = `
+                    <span class="text-4xl">${item.emoji}</span>
+                    <span class="font-display font-bold text-sm leading-tight">${item.name}</span>
+                `;
+                grid.appendChild(btn);
+            });
+        }
+
+        function handleSelectClothing(item) {
+            const scenario = weatherScenarios[currentWeatherKey];
+
+            if (equippedItems.includes(item.id)) {
+                equippedItems = equippedItems.filter(id => id !== item.id);
+                renderWeatherView();
+                return;
+            }
+
+            if (item.suitableFor === currentWeatherKey) {
+                equippedItems.push(item.id);
+                playGentleChime('step');
+                speakText(`Yes! ${item.name} is great for ${currentWeatherKey} weather.`);
+
+                // Check if all needed items are equipped
+                const allMatched = scenario.neededIds.every(reqId => equippedItems.includes(reqId));
+                if (allMatched && !weatherScenarioSolved) {
+                    weatherScenarioSolved = true;
+                    appState.weatherWinsCount += 1;
+                    playGentleChime('complete');
+                    awardStars(2, `Dressed right for ${currentWeatherKey} weather!`);
+                    setTimeout(() => {
+                        speakText(`Great job! Buddy is ready for the ${currentWeatherKey} day. You earned two stars!`);
+                    }, 900);
+                }
+                renderWeatherView();
+            } else {
+                // Gentle, non-punitive feedback
+                playGentleChime('gentleTryAgain');
+                showGentleToast('🤔', 'Let’s Think!', `A ${item.name} is better for ${item.suitableFor} weather.`);
+                speakText(`A ${item.name} is for ${item.suitableFor} weather. Let's pick something for ${currentWeatherKey} weather.`);
+            }
+        }
+
+        /* ------------------------------------------------------------------
+           9. MODULE 5: 5-STAR TOKEN BOARD & COLLECTIBLE STICKER SHOP
+        ------------------------------------------------------------------ */
+        const stickerShopItems = [
+            { id: 'st_brusher', emoji: '🪥', title: 'Super Brusher', cost: 3, desc: 'A shiny toothbrush badge for healthy smiles!' },
+            { id: 'st_bubbles', emoji: '🫧', title: 'Bubble Master', cost: 4, desc: 'Sparkly soap bubbles for super clean hands!' },
+            { id: 'st_weather', emoji: '🌈', title: 'Weather Wizard', cost: 5, desc: 'Ready for sunny, rainy, and chilly days!' },
+            { id: 'st_schedule', emoji: '🗓️', title: 'Schedule Star', cost: 6, desc: 'For following your daily visual schedule!' },
+            { id: 'st_calm', emoji: '🦋', title: 'Calm Champion', cost: 8, desc: 'A peaceful butterfly for awesome self-care!' },
+            { id: 'st_trophy', emoji: '🏆', title: 'Independence Hero', cost: 12, desc: 'The ultimate self-care champion trophy!' }
+        ];
+
+        function changeTokenGoal(newGoal) {
+            appState.tokenGoal = newGoal;
+            saveState();
+            renderRewardsView();
+            speakText(`Working toward ${newGoal}.`);
+        }
+
+        function saveCustomTokenGoal() {
+            const input = document.getElementById('settings-custom-goal');
+            const val = input.value.trim();
+            if (!val) return;
+            appState.tokenGoal = '🎁 ' + val;
+            input.value = '';
+            saveState();
+            if (currentView === 'rewards') renderRewardsView();
+            showGentleToast('🎯', 'Goal Updated!', `New 5-Star Token Goal: ${appState.tokenGoal}`);
+        }
+
+        function claimTokenGoal() {
+            if (appState.tokenCount < 5) return;
+            const goalName = appState.tokenGoal;
+            appState.tokenCount = 0;
+            saveState();
+            playGentleChime('complete');
+            showGentleToast('🎉', 'Reward Claimed!', `Time for ${goalName}! Starting a fresh 5-Star board.`);
+            speakText(`Congratulations! You filled all five stars for ${goalName}!`);
+            renderRewardsView();
+        }
+
+        function buySticker(stickerId) {
+            const sticker = stickerShopItems.find(s => s.id === stickerId);
+            if (!sticker) return;
+            if ((appState.unlockedStickers || []).includes(stickerId)) {
+                speakText(`${sticker.title}. ${sticker.desc}`);
+                return;
+            }
+            if (appState.stars < sticker.cost) {
+                playGentleChime('gentleTryAgain');
+                showGentleToast('⭐', 'Keep Practicing!', `You need ${sticker.cost - appState.stars} more star(s) for ${sticker.title}.`);
+                speakText(`You need ${sticker.cost} stars for ${sticker.title}. Keep practicing to earn more stars!`);
+                return;
+            }
+
+            appState.stars -= sticker.cost;
+            appState.unlockedStickers = [...(appState.unlockedStickers || []), stickerId];
+            saveState();
+            playGentleChime('complete');
+            showGentleToast(sticker.emoji, 'Sticker Unlocked!', `You added ${sticker.title} to your album!`);
+            speakText(`Hooray! You unlocked the ${sticker.title} sticker!`);
+            renderRewardsView();
+        }
+
+        function renderRewardsView() {
+            document.getElementById('rewards-total-stars').textContent = appState.stars;
+
+            // Update 5-Star Token Board
+            const goalSelect = document.getElementById('token-goal-select');
+            if ([...goalSelect.options].some(o => o.value === appState.tokenGoal)) {
+                goalSelect.value = appState.tokenGoal;
+            }
+            document.getElementById('token-goal-display').textContent = appState.tokenGoal;
+
+            const slotsContainer = document.getElementById('token-board-slots');
+            slotsContainer.innerHTML = '';
+            for (let i = 1; i <= 5; i++) {
+                const filled = i <= (appState.tokenCount || 0);
+                const slot = document.createElement('div');
+                slot.className = `w-14 h-14 sm:w-16 sm:h-16 rounded-2xl border-2 flex items-center justify-center text-3xl sm:text-4xl transition ${
+                    filled
+                        ? 'bg-softYellowLight border-softYellow shadow-sm scale-105'
+                        : 'bg-cream border-dashed border-stone-300 opacity-60'
+                }`;
+                slot.textContent = filled ? '⭐' : '☆';
+                slotsContainer.appendChild(slot);
+            }
+
+            const claimBtn = document.getElementById('claim-token-goal-btn');
+            claimBtn.classList.toggle('hidden', (appState.tokenCount || 0) < 5);
+
+            // Render Sticker Shop & Album
+            const grid = document.getElementById('badges-grid');
+            grid.innerHTML = '';
+
+            stickerShopItems.forEach(sticker => {
+                const isUnlocked = (appState.unlockedStickers || []).includes(sticker.id);
+                const canAfford = appState.stars >= sticker.cost;
+
+                const card = document.createElement('div');
+                card.className = `rounded-3xl border-2 p-6 flex flex-col items-center text-center gap-3 transition ${
+                    isUnlocked
+                        ? 'bg-softYellowLight/80 border-softYellow shadow-sm'
+                        : 'bg-white border-softSand'
+                }`;
+
+                card.innerHTML = `
+                    <div class="w-20 h-20 rounded-3xl ${isUnlocked ? 'bg-white border-softYellow' : 'bg-softSand border-stone-200'} border-2 flex items-center justify-center text-5xl shadow-sm">
+                        ${isUnlocked ? sticker.emoji : '🎁'}
+                    </div>
+                    <div class="space-y-1">
+                        <span class="inline-block text-xs font-extrabold uppercase tracking-wider px-3 py-1 rounded-full ${
+                            isUnlocked ? 'bg-sageLight text-sageDark' : 'bg-softYellowLight text-amber-800'
+                        }">
+                            ${isUnlocked ? '✅ In My Album' : `Cost: ${sticker.cost} ⭐`}
+                        </span>
+                        <h4 class="font-display font-extrabold text-xl text-ink pt-1">${sticker.title}</h4>
+                        <p class="text-sm text-inkMuted">${sticker.desc}</p>
+                    </div>
+                    <div class="flex items-center gap-2 pt-1">
+                        <button onclick="speakText('${sticker.title}. ${sticker.desc}')" class="px-3.5 py-2 rounded-xl bg-calmBlueLight border border-calmBlue font-display font-bold text-xs text-ink transition">
+                            🔊 Listen
+                        </button>
+                        ${isUnlocked
+                            ? `<span class="px-4 py-2 rounded-xl bg-sageLight text-sageDark font-display font-bold text-xs">Collected!</span>`
+                            : `<button onclick="buySticker('${sticker.id}')" class="px-4 py-2 rounded-xl font-display font-extrabold text-xs transition ${
+                                canAfford
+                                    ? 'bg-sage hover:bg-sageDark text-white shadow-sm'
+                                    : 'bg-softSand text-inkMuted border border-stone-200'
+                            }">Trade ${sticker.cost} ⭐</button>`
+                        }
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        /* ------------------------------------------------------------------
+           10. CAREGIVER SETTINGS MODAL LOGIC
+        ------------------------------------------------------------------ */
+        const handwashSequence = [
+            { startSec: 20, endSec: 17, emoji: '💧', badge: 'Step 1 of 5 (4 sec)', title: 'Wet Your Hands', desc: 'Turn on the water and get both hands wet.' },
+            { startSec: 16, endSec: 13, emoji: '🧼', badge: 'Step 2 of 5 (4 sec)', title: 'Use Soap', desc: 'Put soap on your hands and make bubbles.' },
+            { startSec: 12, endSec: 6,  emoji: '🫧', badge: 'Step 3 of 5 (7 sec)', title: 'Scrub Everywhere', desc: 'Scrub palms, backs of hands, thumbs, and between fingers!' },
+            { startSec: 5,  endSec: 2,  emoji: '🚿', badge: 'Step 4 of 5 (4 sec)', title: 'Rinse Off Bubbles', desc: 'Wash all the soap bubbles away with clean water.' },
+            { startSec: 1,  endSec: 0,  emoji: '🧻', badge: 'Step 5 of 5',         title: 'Dry Your Hands', desc: 'Dry your hands with a clean towel. All clean!' }
+        ];
+
+        let hwTimeLeft = 20;
+        let hwInterval = null;
+        let hwRunning = false;
+        let lastSpokenStepIdx = -1;
+
+        function toggleHandwashTimer() {
+            if (hwRunning) {
+                pauseHandwashTimer();
+            } else {
+                startHandwashTimer();
+            }
+        }
+
+        function startHandwashTimer() {
+            if (hwTimeLeft <= 0) {
+                hwTimeLeft = 20;
+                lastSpokenStepIdx = -1;
+            }
+            hwRunning = true;
+            document.getElementById('hw-start-btn').innerHTML = '<span>⏸️</span> Pause';
+            document.getElementById('handwash-bubbles').classList.remove('hidden');
+
+            updateHandwashUI();
+
+            hwInterval = setInterval(() => {
+                hwTimeLeft -= 1;
+                updateHandwashUI();
+
+                if (hwTimeLeft <= 0) {
+                    clearInterval(hwInterval);
+                    hwRunning = false;
+                    document.getElementById('hw-start-btn').innerHTML = '<span>▶️</span> Wash Again';
+                    document.getElementById('handwash-bubbles').classList.add('hidden');
+
+                    appState.handwashWinsCount += 1;
+                    playGentleChime('complete');
+                    awardStars(2, 'Completed 20-second handwashing!');
+                    speakText('Hooray! Your hands are clean and germ free! You earned two stars!');
+                }
+            }, 1000);
+        }
+
+        function pauseHandwashTimer() {
+            clearInterval(hwInterval);
+            hwRunning = false;
+            document.getElementById('hw-start-btn').innerHTML = '<span>▶️</span> Resume';
+            document.getElementById('handwash-bubbles').classList.add('hidden');
+        }
+
+        function resetHandwashTimer() {
+            clearInterval(hwInterval);
+            hwRunning = false;
+            hwTimeLeft = 20;
+            lastSpokenStepIdx = -1;
+
+            document.getElementById('hw-start-btn').innerHTML = '<span>▶️</span> Start Washing';
+            document.getElementById('handwash-bubbles').classList.add('hidden');
+            document.getElementById('hw-step-badge').textContent = 'Ready to Start';
+            document.getElementById('hw-step-emoji').textContent = '👐';
+            document.getElementById('hw-step-title').textContent = 'Press Start to Wash Hands';
+            document.getElementById('hw-step-desc').textContent = 'We will wet, soap, scrub, rinse, and dry our hands together!';
+            document.getElementById('hw-seconds-display').textContent = '20 seconds';
+            document.getElementById('hw-progress-bar').style.width = '100%';
+
+            document.querySelectorAll('.hw-pill').forEach(p => {
+                p.classList.remove('bg-calmBlueLight', 'border-calmBlue', 'scale-105');
+                p.classList.add('bg-softSand', 'border-stone-200');
+            });
+        }
+
+        function getCurrentHandwashStepIndex() {
+            return handwashSequence.findIndex(s => hwTimeLeft <= s.startSec && hwTimeLeft >= s.endSec);
+        }
+
+        function updateHandwashUI() {
+            document.getElementById('hw-seconds-display').textContent = `${hwTimeLeft} second${hwTimeLeft === 1 ? '' : 's'}`;
+            const pct = (hwTimeLeft / 20) * 100;
+            document.getElementById('hw-progress-bar').style.width = `${pct}%`;
+
+            const stepIdx = getCurrentHandwashStepIndex();
+            if (stepIdx !== -1) {
+                const step = handwashSequence[stepIdx];
+                document.getElementById('hw-step-badge').textContent = step.badge;
+                document.getElementById('hw-step-emoji').textContent = step.emoji;
+                document.getElementById('hw-step-title').textContent = step.title;
+                document.getElementById('hw-step-desc').textContent = step.desc;
+
+                // Highlight pill
+                document.querySelectorAll('.hw-pill').forEach((pill, idx) => {
+                    if (idx === stepIdx) {
+                        pill.classList.add('bg-calmBlueLight', 'border-calmBlue');
+                        pill.classList.remove('bg-softSand', 'border-stone-200');
+                    } else if (idx < stepIdx) {
+                        pill.classList.add('bg-sageLight', 'border-sage');
+                        pill.classList.remove('bg-softSand', 'border-stone-200', 'bg-calmBlueLight', 'border-calmBlue');
+                    } else {
+                        pill.classList.remove('bg-calmBlueLight', 'border-calmBlue', 'bg-sageLight', 'border-sage');
+                        pill.classList.add('bg-softSand', 'border-stone-200');
+                    }
+                });
+
+                // Speak step automatically when transitioning
+                if (stepIdx !== lastSpokenStepIdx && hwRunning) {
+                    lastSpokenStepIdx = stepIdx;
+                    playGentleChime('step');
+                    speakText(`${step.title}. ${step.desc}`);
+                }
+            }
+        }
+
+        function speakCurrentHandwashStep() {
+            const title = document.getElementById('hw-step-title').textContent;
+            const desc = document.getElementById('hw-step-desc').textContent;
+            speakText(`${title}. ${desc}`);
+        }
+
+        /* ------------------------------------------------------------------
+           8. MODULE 4: MY STAR CHART & REWARD BADGES
+        ------------------------------------------------------------------ */
+        const rewardBadges = [
+            {
+                id: 'first_star',
+                emoji: '🌱',
+                title: 'First Step Explorer',
+                desc: 'Earn your first 2 stars in any activity.',
+                unlocked: (s) => s.stars >= 2
+            },
+            {
+                id: 'clean_hands',
+                emoji: '🫧',
+                title: 'Clean Hands Hero',
+                desc: 'Finish the 20-second handwashing helper.',
+                unlocked: (s) => s.handwashWinsCount >= 1
+            },
+            {
+                id: 'weather_pro',
+                emoji: '🧥',
+                title: 'Dressing Pro',
+                desc: 'Dress your buddy for the weather.',
+                unlocked: (s) => s.weatherWinsCount >= 1
+            },
+            {
+                id: 'routine_star',
+                emoji: '🪥',
+                title: 'Daily Routine Star',
+                desc: 'Finish all 5 steps of a daily routine.',
+                unlocked: (s) => s.routinesCompletedCount >= 1
+            },
+            {
+                id: 'super_helper',
+                emoji: '🌟',
+                title: 'Super Self-Care Champ',
+                desc: 'Collect 10 stars total!',
+                unlocked: (s) => s.stars >= 10
+            },
+            {
+                id: 'master_buddy',
+                emoji: '🏆',
+                title: 'Independence Master',
+                desc: 'Collect 20 stars total!',
+                unlocked: (s) => s.stars >= 20
+            }
+        ];
+
+        function renderRewardsView() {
+            document.getElementById('rewards-total-stars').textContent = appState.stars;
+            const grid = document.getElementById('badges-grid');
+            grid.innerHTML = '';
+
+            rewardBadges.forEach(badge => {
+                const isUnlocked = badge.unlocked(appState);
+                const card = document.createElement('div');
+                card.className = `rounded-3xl border-2 p-6 flex flex-col items-center text-center gap-3 transition ${
+                    isUnlocked
+                        ? 'bg-softYellowLight/80 border-softYellow shadow-sm'
+                        : 'bg-white border-softSand opacity-75'
+                }`;
+
+                card.innerHTML = `
+                    <div class="w-20 h-20 rounded-3xl ${isUnlocked ? 'bg-white border-softYellow' : 'bg-softSand border-stone-200 grayscale'} border-2 flex items-center justify-center text-5xl shadow-sm">
+                        ${isUnlocked ? badge.emoji : '🔒'}
+                    </div>
+                    <div class="space-y-1">
+                        <span class="inline-block text-xs font-extrabold uppercase tracking-wider px-3 py-1 rounded-full ${
+                            isUnlocked ? 'bg-sageLight text-sageDark' : 'bg-softSand text-inkMuted'
+                        }">
+                            ${isUnlocked ? 'Unlocked!' : 'Keep Practicing'}
+                        </span>
+                        <h3 class="font-display font-extrabold text-xl text-ink pt-1">${badge.title}</h3>
+                        <p class="text-sm text-inkMuted">${badge.desc}</p>
+                    </div>
+                    <button onclick="speakText('${badge.title}. ${badge.desc}')" class="mt-1 px-4 py-2 rounded-xl bg-white border border-stone-200 hover:bg-softSand font-display font-bold text-xs text-ink transition">
+                        🔊 Listen
+                    </button>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        /* ------------------------------------------------------------------
+           9. CAREGIVER SETTINGS MODAL LOGIC
+        ------------------------------------------------------------------ */
+        function openSettingsModal() {
+            document.getElementById('settings-modal').classList.remove('hidden');
+            cancelResetConfirm();
+            updateGlobalUI();
+        }
+
+        function closeSettingsModal() {
+            document.getElementById('settings-modal').classList.add('hidden');
+        }
+
+        function toggleSoundEffects() {
+            appState.soundEffects = !appState.soundEffects;
+            saveState();
+            if (appState.soundEffects) playGentleChime('step');
+        }
+
+        function setSpeechRate(rate) {
+            appState.speechRate = rate;
+            saveState();
+            speakText('Voice speed updated.');
+        }
+
+        function showResetConfirm() {
+            document.getElementById('reset-initial-box').classList.add('hidden');
+            document.getElementById('reset-confirm-box').classList.remove('hidden');
+        }
+
+        function cancelResetConfirm() {
+            document.getElementById('reset-initial-box').classList.remove('hidden');
+            document.getElementById('reset-confirm-box').classList.add('hidden');
+        }
+
+        function confirmResetProgress() {
+            const preservedSettings = {
+                quietMode: appState.quietMode,
+                soundEffects: appState.soundEffects,
+                speechRate: appState.speechRate
+            };
+            appState = { ...JSON.parse(JSON.stringify(defaultState)), ...preservedSettings };
+            saveState();
+            cancelResetConfirm();
+            closeSettingsModal();
+            navigateTo('home');
+            showGentleToast('🌱', 'Fresh Start', 'All stars and routines have been reset.');
+        }
+
+        /* ------------------------------------------------------------------
+           11. INITIALIZATION
+        ------------------------------------------------------------------ */
+        window.addEventListener('DOMContentLoaded', () => {
+            updateGlobalUI();
+            switchMiniGame('weather');
+            navigateTo('schedule');
+        });
+    </script>
+</body>
+</html>
